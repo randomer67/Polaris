@@ -118,7 +118,7 @@
       <div class="flex gap-3">
         <div class="flex-1 relative">
           <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input id="searchInput" type="text" placeholder="输入关键词、论文标题或作者名..."
+          <input id="searchInput" type="text" placeholder="输入关键词、论文标题或作者名（支持中文，会自动翻译）..."
             class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-surface-900/60 border border-gray-200/60 dark:border-gray-800 rounded-xl input-focus outline-none transition text-sm placeholder:text-gray-300 dark:placeholder:text-gray-600">
         </div>
         <button onclick="doSearch(1)" class="px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white rounded-xl transition font-medium text-sm whitespace-nowrap shadow-sm shadow-accent-500/20">
@@ -139,6 +139,9 @@
           <span class="text-xs text-gray-400 dark:text-gray-500">仅开放获取</span>
         </label>
       </div>
+      <p class="text-[11px] text-gray-400 dark:text-gray-600 mt-3 leading-relaxed">
+        提示：中文关键词会自动映射为英文学术术语（如「集成电路」→ integrated circuit）；英文关键词直接检索，结果更精准。
+      </p>
     </div>
 
     <!-- 搜索结果 -->
@@ -208,26 +211,52 @@
 
 <script>
 const DISCIPLINES = [
-  { name:'集成电路', query:'integrated circuit',
+  { name:'集成电路', query:'integrated circuit', en:'integrated circuit',
     svg:'<path d="M6 4h12v16H6z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6 8H3m3 4H3m3 4H3m15-8h3m-3 4h3m-3 4h3M9 4V1m6 3V1m-6 19v3m6-3v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><rect x="9" y="9" width="6" height="6" rx="1" fill="currentColor" opacity=".15"/>' },
-  { name:'光电工程', query:'optical engineering',
+  { name:'光电工程', query:'optical engineering', en:'optical engineering',
     svg:'<circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42m12.72-12.72l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' },
-  { name:'计算机科学', query:'computer science',
+  { name:'计算机科学', query:'computer science', en:'computer science',
     svg:'<rect x="2" y="3" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 21h8m-4-4v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7 8l3 3-3 3m5 0h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' },
-  { name:'自动化', query:'automation robotics',
+  { name:'自动化', query:'automation robotics', en:'automation robotics',
     svg:'<rect x="5" y="8" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="13" r="1.5" fill="currentColor" opacity=".3"/><circle cx="15" cy="13" r="1.5" fill="currentColor" opacity=".3"/><path d="M12 4v4M9 4h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' },
-  { name:'新能源', query:'renewable energy solar',
+  { name:'新能源', query:'renewable energy solar', en:'renewable energy',
     svg:'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>' },
-  { name:'材料科学', query:'materials science nanomaterials',
+  { name:'材料科学', query:'materials science nanomaterials', en:'materials science',
     svg:'<path d="M12 2L2 7l10 5 10-5-10-5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>' },
-  { name:'生物医学工程', query:'biomedical engineering',
+  { name:'生物医学工程', query:'biomedical engineering', en:'biomedical engineering',
     svg:'<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 11h8M12 7v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' },
-  { name:'智能制造', query:'intelligent manufacturing industry 4.0',
+  { name:'智能制造', query:'intelligent manufacturing', en:'intelligent manufacturing',
     svg:'<path d="M1 20h22M4 20V8l5 4V8l5 4V4l5 4v12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' },
 ];
 
+/* ============================================================
+   中文→英文学术术语映射表
+   中文关键词先经过这里翻译，再送给 OpenAlex
+   匹配策略：精确匹配 > 最长子串匹配
+   ============================================================ */
+const CN_EN_MAP = {
+  '集成电路':'integrated circuit','芯片':'chip','半导体':'semiconductor','微电子':'microelectronics',
+  '互联网':'internet','网络':'network','计算机网络':'computer network','物联网':'internet of things',
+  '计算机':'computer','电脑':'computer','软件':'software','硬件':'hardware','算法':'algorithm',
+  '人工智能':'artificial intelligence','机器学习':'machine learning','深度学习':'deep learning',
+  '神经网络':'neural network','自然语言处理':'natural language processing','计算机视觉':'computer vision',
+  '大数据':'big data','云计算':'cloud computing','区块链':'blockchain','数据挖掘':'data mining',
+  '光电':'optoelectronics','光学':'optics','激光':'laser','光子':'photonics','光纤':'optical fiber',
+  '新能源':'renewable energy','太阳能':'solar energy','风能':'wind energy','电池':'battery','储能':'energy storage',
+  '材料':'materials','纳米':'nanomaterials','石墨烯':'graphene','高分子':'polymer','复合材料':'composite',
+  '生物医学':'biomedical','医疗':'medical','药物':'drug','基因':'gene','蛋白质':'protein','细胞':'cell',
+  '自动化':'automation','机器人':'robotics','控制':'control','无人驾驶':'autonomous driving','自动驾驶':'autonomous driving',
+  '智能制造':'intelligent manufacturing','工业':'industrial','制造':'manufacturing','供应链':'supply chain',
+  '通信':'communication','信号':'signal','无线':'wireless','5G':'5G','天线':'antenna',
+  '量子':'quantum','物理':'physics','化学':'chemistry','数学':'mathematics','生物':'biology','医学':'medicine',
+  '环境':'environment','能源':'energy','电力':'electric power','机械':'mechanical','电子':'electronic',
+  '虚拟现实':'virtual reality','增强现实':'augmented reality','图像':'image','语音':'speech',
+  '集成':'integration','系统':'system','检测':'detection','识别':'recognition','优化':'optimization',
+  '网络安全':'cybersecurity','信息安全':'information security','隐私':'privacy','加密':'encryption',
+};
+
+let currentPage = 1, currentQuery = '', allResults = [], lastRawQuery = '';
 const PER_PAGE = 15;
-let currentPage = 1, currentQuery = '', allResults = [];
 
 function init() {
   const tagContainer = document.getElementById('disciplineTags');
@@ -255,6 +284,29 @@ function init() {
   });
 }
 
+/* 判断字符串是否纯 ASCII（英文/数字/符号） */
+function isAscii(s) { return /^[\x00-\x7F]*$/.test(s); }
+
+/* 中文 → 英文翻译；返回 { query, translated, original } */
+function translateQuery(raw) {
+  const t = raw.trim();
+  if (!t) return { query: '', translated: false, original: t };
+  if (isAscii(t)) return { query: t, translated: false, original: t };
+
+  // 精确匹配
+  if (CN_EN_MAP[t]) return { query: CN_EN_MAP[t], translated: true, original: t };
+
+  // 最长子串匹配
+  let best = null, bestLen = 0;
+  for (const [cn, en] of Object.entries(CN_EN_MAP)) {
+    if (t.includes(cn) && cn.length > bestLen) { best = en; bestLen = cn.length; }
+  }
+  if (best) return { query: best, translated: true, original: t };
+
+  // 无法翻译：保留原词，标记未翻译
+  return { query: t, translated: false, original: t, untranslated: true };
+}
+
 function fixUrl(work) {
   if (work.open_access?.oa_url) return work.open_access.oa_url;
   if (work.doi) {
@@ -269,36 +321,44 @@ function fixUrl(work) {
 }
 
 /* ============================================================
-   核心修复：手动拼接 URL，避免冒号被 URLSearchParams 编码
-   OpenAlex 的 sort / filter 参数值必须保留原始冒号（:），
-   否则会被拒为非法参数（HTTP 400 → “搜索参数有误”）
+   核心修复 2：改用 title_and_abstract.search，缩小搜索范围
+   之前用 search= 是全文检索，会匹配到很多不相关的内容
+   现在只搜标题和摘要，再加上前端相关性过滤，结果一一对应
    ============================================================ */
 function buildOpenAlexUrl(query, page, sort, oaOnly) {
+  const filters = [];
+  filters.push('title_and_abstract.search:' + encodeURIComponent(query));
+  if (oaOnly) filters.push('is_oa:true');
+
   const parts = [];
-  parts.push('search=' + encodeURIComponent(query));
+  parts.push('filter=' + filters.join(','));
   parts.push('page=' + page);
   parts.push('per-page=' + PER_PAGE);
   parts.push('mailto=' + encodeURIComponent('polaris@sztu.edu.cn'));
 
-  // 排序：只使用 OpenAlex 官方支持的字段
-  if (sort === 'cited') {
-    parts.push('sort=cited_by_count:desc');
-  } else if (sort === 'date') {
-    parts.push('sort=publication_date:desc');
-  }
-  // relevance 时不传 sort，OpenAlex 默认按相关度
-
-  // 开放获取过滤
-  if (oaOnly) {
-    parts.push('filter=is_oa:true');
-  }
+  if (sort === 'cited') parts.push('sort=cited_by_count:desc');
+  else if (sort === 'date') parts.push('sort=publication_date:desc');
 
   return 'https://api.openalex.org/works?' + parts.join('&');
 }
 
+/* 前端相关性过滤：标题或摘要必须至少命中一个查询词 */
+function filterRelevant(results, query) {
+  const words = query.toLowerCase().split(/\s+/).filter(w => w.length >= 3);
+  if (!words.length) return results;
+  const filtered = results.filter(p => {
+    const text = ((p.title || '') + ' ' + (p.tldr || '') + ' ' + (p.venue || '')).toLowerCase();
+    return words.some(w => text.includes(w));
+  });
+  // 过滤后太少就回退到原结果，避免空结果
+  return filtered.length >= Math.min(3, results.length) ? filtered : results;
+}
+
 async function doSearch(page = 1) {
-  const query = document.getElementById('searchInput').value.trim();
-  if (!query) return;
+  const rawQuery = document.getElementById('searchInput').value.trim();
+  if (!rawQuery) return;
+  lastRawQuery = rawQuery;
+  const { query, translated, original, untranslated } = translateQuery(rawQuery);
   currentQuery = query;
   currentPage = page;
   const sort = document.getElementById('sortSelect').value;
@@ -319,39 +379,34 @@ async function doSearch(page = 1) {
 
   try {
     const url = buildOpenAlexUrl(query, page, sort, oaOnly);
+    console.log('[Polaris] 原始输入：', rawQuery, '→ 实际查询：', query);
     console.log('[Polaris] 请求 URL：', url);
 
     const oaFetch = await fetch(url, { headers: { 'Accept': 'application/json' } });
 
     if (!oaFetch.ok) {
-      // 读取 OpenAlex 返回的具体错误信息
       let detail = '';
       try {
         const errBody = await oaFetch.json();
         detail = errBody.message || errBody.error || JSON.stringify(errBody);
       } catch (_) {}
-
       console.error('[Polaris] HTTP', oaFetch.status, detail || '(无详情)');
-
-      if (oaFetch.status === 400) {
-        throw new Error('搜索参数有误' + (detail ? '：' + detail : '，请检查关键词后重试'));
-      }
+      if (oaFetch.status === 400) throw new Error('搜索参数有误' + (detail ? '：' + detail : '，请检查关键词后重试'));
       if (oaFetch.status === 403) throw new Error('访问被拒绝，请稍后重试');
       if (oaFetch.status === 429) throw new Error('请求太频繁，请稍等 30 秒后再试');
       throw new Error(`搜索服务暂时不可用（HTTP ${oaFetch.status}）` + (detail ? '：' + detail : ''));
     }
 
     const oaRes = await oaFetch.json();
-    console.log('[Polaris] 返回结果数：', oaRes.meta?.count);
+    console.log('[Polaris] 接口返回总数：', oaRes.meta?.count);
 
-    allResults = [];
+    let collected = [];
     const seen = new Set();
-
     (oaRes.results || []).forEach(w => {
       const t = w.title?.toLowerCase();
       if (!t || seen.has(t)) return;
       seen.add(t);
-      allResults.push({
+      collected.push({
         title: w.title || 'Untitled',
         authors: w.authorships?.map(a => a.author.display_name) || [],
         year: w.publication_year,
@@ -366,10 +421,20 @@ async function doSearch(page = 1) {
       });
     });
 
+    // 前端相关性过滤
+    const before = collected.length;
+    allResults = filterRelevant(collected, query);
+    console.log('[Polaris] 相关性过滤：', before, '→', allResults.length);
+
     if (sort === 'cited') allResults.sort((a, b) => b.citedBy - a.citedBy);
 
     const total = oaRes.meta?.count || allResults.length;
-    document.getElementById('resultSummary').textContent = `${total.toLocaleString()} 条结果 · 第 ${page} 页`;
+    let hint = '';
+    if (translated) hint = ` · 已将「${original}」翻译为 “${query}”`;
+    else if (untranslated) hint = ` · 未识别中文关键词，建议改用英文（如 “${original}” 的英文术语）`;
+
+    document.getElementById('resultSummary').textContent =
+      `${total.toLocaleString()} 条结果 · 第 ${page} 页${hint}`;
     renderResults(allResults);
     renderPagination(total, page);
     window.scrollTo({ top: document.getElementById('searchBox').offsetTop - 80, behavior: 'smooth' });
@@ -390,7 +455,7 @@ async function doSearch(page = 1) {
 function renderResults(papers) {
   const div = document.getElementById('results');
   if (!papers.length) {
-    div.innerHTML = '<div class="text-center py-16 text-gray-400 dark:text-gray-600"><p class="text-sm mb-1">未找到相关论文</p><p class="text-xs">请尝试其他关键词</p></div>';
+    div.innerHTML = '<div class="text-center py-16 text-gray-400 dark:text-gray-600"><p class="text-sm mb-1">未找到相关论文</p><p class="text-xs">请尝试其他关键词，或改用更通用的英文术语</p></div>';
     return;
   }
   div.innerHTML = papers.map((p, i) => {
