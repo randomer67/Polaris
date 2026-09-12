@@ -237,7 +237,7 @@ const CN_EN_MAP = {
   // 电子/集成电路
   '集成电路':'integrated circuit','芯片':'chip','半导体':'semiconductor','微电子':'microelectronics',
   '模拟电路':'analog circuit','数字电路':'digital circuit','电路设计':'circuit design',
-  '系统集成':'system integration','集成':'integrated circuit',          // 短词直接给完整学术术语
+  '系统集成':'system integration','集成':'integrated circuit',
 
   // 计算机
   '互联网':'internet','网络':'network','计算机网络':'computer network','物联网':'internet of things',
@@ -315,20 +315,13 @@ function init() {
 
 function isAscii(s) { return /^[\x00-\x7F]*$/.test(s); }
 
-/* ============================================================
-   翻译升级：支持“前缀扩展”
-   例：用户输入「集成」→ 自动向上补全为「集成电路」→ integrated circuit
-   而不是泛词 integration
-   ============================================================ */
 function findPrefixExpansion(input) {
-  // 在映射表中找“以 input 为前缀、且更长”的词，选最短的那个（最精确）
   let best = null, bestLen = Infinity;
   for (const cn of Object.keys(CN_EN_MAP)) {
     if (cn.length > input.length && cn.startsWith(input) && cn.length < bestLen) {
       best = cn; bestLen = cn.length;
     }
   }
-  // 避免扩得过远（差距 ≤ 4 个字符）
   if (best && best.length - input.length <= 4) return best;
   return null;
 }
@@ -338,7 +331,6 @@ function translateQuery(raw) {
   if (!t) return { query: '', translated: false, original: t };
   if (isAscii(t)) return { query: t, translated: false, original: t };
 
-  // 1. 精确匹配 → 优先看是否有更长前缀术语
   if (CN_EN_MAP[t]) {
     const expanded = findPrefixExpansion(t);
     if (expanded) {
@@ -347,20 +339,17 @@ function translateQuery(raw) {
     return { query: CN_EN_MAP[t], translated: true, original: t };
   }
 
-  // 2. 最长子串匹配（输入中包含某个已知术语）
   let best = null, bestLen = 0;
   for (const [cn, en] of Object.entries(CN_EN_MAP)) {
     if (t.includes(cn) && cn.length > bestLen) { best = en; bestLen = cn.length; }
   }
   if (best) return { query: best, translated: true, original: t };
 
-  // 3. 前缀扩展（用户输入是更长术语的开头）
   const expanded = findPrefixExpansion(t);
   if (expanded) {
     return { query: CN_EN_MAP[expanded], translated: true, original: t, expandedTo: expanded };
   }
 
-  // 4. 无法翻译
   return { query: t, translated: false, original: t, untranslated: true };
 }
 
@@ -386,7 +375,7 @@ function buildOpenAlexUrl(query, page, sort, oaOnly) {
   parts.push('filter=' + filters.join(','));
   parts.push('page=' + page);
   parts.push('per-page=' + PER_PAGE);
-  parts.push('mailto=' + encodeURIComponent('polaris@sztu.edu.cn'));
+  parts.push('mailto=' + encodeURIComponent('watsontrump678@gmail.com'));
 
   if (sort === 'cited') parts.push('sort=cited_by_count:desc');
   else if (sort === 'date') parts.push('sort=publication_date:desc');
@@ -394,12 +383,6 @@ function buildOpenAlexUrl(query, page, sort, oaOnly) {
   return 'https://api.openalex.org/works?' + parts.join('&');
 }
 
-/* ============================================================
-   过滤升级：加权评分 + 严格命中
-   - 标题命中权重最高，摘要次之
-   - 要求全部查询词命中，否则降级
-   - 绝不出现“标题里根本没提这个词”的论文
-   ============================================================ */
 function scorePaper(paper, words) {
   const title = (paper.title || '').toLowerCase();
   const abstract = (paper.tldr || '').toLowerCase();
@@ -413,13 +396,11 @@ function scorePaper(paper, words) {
   }
 
   const total = words.length;
-  // 加权分：标题权重 3，摘要权重 1，期刊 0.5
   const score = (titleHits * 3 + absHits * 1 + venueHits * 0.5) / (total * 3);
   return { score, titleHits, absHits, total };
 }
 
 function filterRelevant(results, query) {
-  // 过滤掉过短的词（连词、介词、单字母）
   const words = query.toLowerCase().split(/[\s,;，；]+/)
     .map(w => w.replace(/[^\w\-]/g, ''))
     .filter(w => w.length >= 3);
@@ -427,7 +408,6 @@ function filterRelevant(results, query) {
 
   const scored = results.map(p => ({ paper: p, ...scorePaper(p, words) }));
 
-  // 严格档：全部词都在标题中；或全部词都在标题+摘要中
   const strict = scored.filter(s =>
     s.titleHits === s.total || (s.titleHits + s.absHits) === s.total
   );
@@ -435,17 +415,14 @@ function filterRelevant(results, query) {
     return strict.sort((a, b) => b.score - a.score).map(s => s.paper);
   }
 
-  // 中等档：标题至少命中一个词
   const medium = scored.filter(s => s.titleHits >= 1);
   if (medium.length >= 3) {
     return medium.sort((a, b) => b.score - a.score).map(s => s.paper);
   }
 
-  // 兜底：按分数排序，只保留分数 > 0 的
   const any = scored.filter(s => s.score > 0).sort((a, b) => b.score - a.score);
   if (any.length >= 3) return any.map(s => s.paper);
 
-  // 真的一条都没命中 → 返回空，触发“未找到”提示
   return any.map(s => s.paper);
 }
 
@@ -544,14 +521,12 @@ async function doSearch(page = 1) {
   }
 }
 
-/* 在标题中高亮命中的查询词 */
 function highlightTitle(title, query) {
   const words = query.toLowerCase().split(/[\s,;，；]+/)
     .map(w => w.replace(/[^\w\-]/g, ''))
     .filter(w => w.length >= 3);
   if (!words.length) return title;
   let out = title;
-  // 按长度倒序替换，避免短词先替换破坏长词
   const sorted = [...new Set(words)].sort((a, b) => b.length - a.length);
   for (const w of sorted) {
     const re = new RegExp('(' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
