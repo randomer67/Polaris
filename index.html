@@ -8,46 +8,31 @@
   <script>
     tailwind.config = {
       darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter','system-ui','sans-serif'] },
-          colors: {
-            surface: { 50:'#f8fafc', 100:'#f1f5f9', 200:'#e2e8f0', 800:'#0c1222', 900:'#060b16', 950:'#030712' },
-            accent: { 400:'#2dd4bf', 500:'#14b8a6', 600:'#0d9488' },
-            warm: { 400:'#fbbf24', 500:'#f59e0b' }
-          }
+      theme: { extend: {
+        colors: {
+          surface: { 50:'#f8fafc', 100:'#f1f5f9', 800:'#0c1222', 900:'#060b16', 950:'#030712' },
+          accent: { 400:'#2dd4bf', 500:'#14b8a6', 600:'#0d9488' }
         }
-      }
+      }}
     }
   </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { font-family: 'Inter', system-ui, sans-serif; }
-    @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
     @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
     @keyframes glow { 0%,100% { opacity:.4; } 50% { opacity:.7; } }
-    .spinner { width:28px;height:28px;border:2px solid rgba(45,212,191,.15);border-top-color:#2dd4bf;border-radius:50%;animation:spin .7s linear infinite; }
     .fade-up { animation: fadeUp .4s ease-out both; }
-    .card-hover { transition: all .2s cubic-bezier(.4,0,.2,1); }
-    .card-hover:hover { border-color: rgba(45,212,191,.3); box-shadow: 0 0 0 1px rgba(45,212,191,.1), 0 8px 32px rgba(0,0,0,.12); }
-    .dark .card-hover:hover { border-color: rgba(45,212,191,.25); box-shadow: 0 0 0 1px rgba(45,212,191,.08), 0 8px 32px rgba(0,0,0,.4); }
+    .card-hover { transition: all .2s; }
+    .card-hover:hover { border-color: rgba(45,212,191,.3); box-shadow: 0 8px 32px rgba(0,0,0,.1); }
+    .dark .card-hover:hover { border-color: rgba(45,212,191,.25); box-shadow: 0 8px 32px rgba(0,0,0,.4); }
     .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
     .dark .skeleton { background: linear-gradient(90deg, #0f172a 25%, #1e293b 50%, #0f172a 75%); background-size: 200% 100%; }
-    .scroll-top-btn { position:fixed;bottom:28px;right:28px;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;pointer-events:none;transition:all .3s;z-index:50; }
-    .scroll-top-btn.show { opacity:1; pointer-events:auto; }
-    .tag { display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:500;letter-spacing:.01em; }
-    ::-webkit-scrollbar { width:4px; }
-    ::-webkit-scrollbar-thumb { background:#334155;border-radius:2px; }
     .hero-glow { position:absolute; border-radius:50%; filter:blur(100px); pointer-events:none; animation: glow 4s ease-in-out infinite; }
-    .nav-blur { backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); }
-    .disc-btn { transition: all .2s; }
-    .disc-btn:hover { transform: translateY(-2px); }
-    .disc-btn.active-disc { border-color: rgba(45,212,191,.5) !important; background: rgba(45,212,191,.08) !important; }
-    .link-badge { display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:5px;font-size:11px;font-weight:500;transition:all .15s;text-decoration:none; }
-    .link-badge:hover { background: rgba(45,212,191,.1); border-color: rgba(45,212,191,.3); color: #2dd4bf; }
+    .nav-blur { backdrop-filter: blur(20px) saturate(180%); }
     .input-focus:focus { border-color: rgba(45,212,191,.5); box-shadow: 0 0 0 3px rgba(45,212,191,.1); }
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-thumb { background:#334155; border-radius:2px; }
   </style>
 </head>
 <body class="bg-surface-50 dark:bg-surface-950 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
@@ -57,11 +42,11 @@
     <div class="max-w-6xl mx-auto px-6 py-3 flex justify-between items-center">
       <div class="flex items-center gap-3">
         <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center shadow-lg shadow-accent-500/20">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </div>
         <div>
           <h1 class="text-sm font-bold tracking-tight leading-tight">Polaris</h1>
-          <p class="text-[10px] text-gray-400 dark:text-gray-500 tracking-widest uppercase leading-tight">SZTU</p>
+          <p class="text-[10px] text-gray-400 tracking-widest uppercase leading-tight">SZTU</p>
         </div>
       </div>
       <div class="flex items-center gap-1">
@@ -71,48 +56,46 @@
           <span id="favCount" class="absolute -top-0.5 -right-0.5 bg-accent-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
         </button>
         <button onclick="toggleDark()" class="w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800/60 flex items-center justify-center transition text-gray-500 dark:text-gray-400">
-          <svg id="iconMoon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-          <svg id="iconSun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="hidden"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg id="iconMoon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg id="iconSun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="hidden"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         </button>
       </div>
     </div>
   </nav>
 
+  <!-- 主内容 -->
   <main class="max-w-6xl mx-auto px-6 py-10">
 
     <!-- Hero -->
     <div id="heroSection" class="relative text-center mb-14 overflow-hidden py-6">
       <div class="hero-glow bg-accent-400/30 dark:bg-accent-500/10" style="width:400px;height:400px;top:-150px;left:30%;"></div>
-      <div class="hero-glow bg-warm-400/20 dark:bg-warm-500/5" style="width:300px;height:300px;top:-100px;right:20%;animation-delay:2s;"></div>
       <div class="relative z-10">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-500/5 dark:bg-accent-500/10 text-accent-600 dark:text-accent-400 text-[11px] font-medium mb-6 border border-accent-500/10 dark:border-accent-500/20">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-500/5 text-accent-600 dark:text-accent-400 text-[11px] font-medium mb-6 border border-accent-500/10">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           Shenzhen Technology University
         </div>
         <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
           <span class="bg-gradient-to-r from-gray-900 via-accent-600 to-gray-900 dark:from-gray-100 dark:via-accent-400 dark:to-gray-100 bg-clip-text text-transparent">探索全球顶级学术成果</span>
         </h2>
-        <p class="text-gray-400 dark:text-gray-500 max-w-lg mx-auto text-sm leading-relaxed">
-          聚合全球开放获取学术资源，一站式检索顶级期刊与会议论文
-        </p>
+        <p class="text-gray-400 max-w-lg mx-auto text-sm leading-relaxed">聚合全球开放获取学术资源，一站式检索顶级期刊与会议论文</p>
         <div class="grid grid-cols-3 gap-3 max-w-sm mx-auto mt-10">
           <div class="rounded-xl p-4 bg-white dark:bg-surface-800/50 border border-gray-100 dark:border-gray-800/80">
-            <div class="text-xl font-extrabold text-gray-900 dark:text-gray-100">2.6亿+</div>
-            <div class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-wider">文献总量</div>
+            <div class="text-xl font-extrabold">2.6亿+</div>
+            <div class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">文献总量</div>
           </div>
           <div class="rounded-xl p-4 bg-white dark:bg-surface-800/50 border border-gray-100 dark:border-gray-800/80">
-            <div class="text-xl font-extrabold text-gray-900 dark:text-gray-100">8</div>
-            <div class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-wider">优势学科</div>
+            <div class="text-xl font-extrabold">8</div>
+            <div class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">优势学科</div>
           </div>
           <div class="rounded-xl p-4 bg-white dark:bg-surface-800/50 border border-gray-100 dark:border-gray-800/80">
-            <div class="text-xl font-extrabold text-gray-900 dark:text-gray-100">2</div>
-            <div class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-wider">数据源</div>
+            <div class="text-xl font-extrabold">2</div>
+            <div class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">数据源</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 搜索区域 -->
+    <!-- 搜索框 -->
     <div id="searchBox" class="bg-white dark:bg-surface-800/40 rounded-2xl border border-gray-200/60 dark:border-gray-800/60 p-6 mb-8">
       <div class="flex flex-wrap gap-2 mb-5" id="disciplineTags"></div>
       <div class="flex gap-3">
@@ -121,30 +104,28 @@
           <input id="searchInput" type="text" placeholder="输入关键词、论文标题或作者名..."
             class="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-surface-900/60 border border-gray-200/60 dark:border-gray-800 rounded-xl input-focus outline-none transition text-sm placeholder:text-gray-300 dark:placeholder:text-gray-600">
         </div>
-        <button onclick="doSearch(1)" class="px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white rounded-xl transition font-medium text-sm whitespace-nowrap shadow-sm shadow-accent-500/20">
-          检索
-        </button>
+        <button onclick="doSearch(1)" id="searchBtn" class="px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white rounded-xl transition font-medium text-sm whitespace-nowrap shadow-sm shadow-accent-500/20">检索</button>
       </div>
       <div class="flex flex-wrap items-center gap-5 mt-4 text-sm">
         <div class="flex items-center gap-2">
-          <label class="text-gray-400 dark:text-gray-500 text-[11px] font-medium uppercase tracking-wider">排序</label>
+          <label class="text-gray-400 text-[11px] font-medium uppercase tracking-wider">排序</label>
           <select id="sortSelect" class="bg-gray-50 dark:bg-surface-900/60 border border-gray-200/60 dark:border-gray-800 rounded-lg px-3 py-1.5 text-xs outline-none cursor-pointer">
-            <option value="cited">引用量最高</option>
-            <option value="date">最新发布</option>
             <option value="relevance">相关度</option>
+            <option value="citationCount">引用量最高</option>
+            <option value="publicationDate">最新发布</option>
           </select>
         </div>
         <label class="flex items-center gap-2 cursor-pointer select-none">
-          <input type="checkbox" id="oaOnly" class="w-3.5 h-3.5 rounded border-gray-300 dark:border-gray-600 text-accent-500 focus:ring-accent-500/30 cursor-pointer">
-          <span class="text-xs text-gray-400 dark:text-gray-500">仅开放获取</span>
+          <input type="checkbox" id="oaOnly" class="w-3.5 h-3.5 rounded border-gray-300 text-accent-500 cursor-pointer">
+          <span class="text-xs text-gray-400">仅开放获取 (Open Access)</span>
         </label>
       </div>
     </div>
 
-    <!-- 搜索结果 -->
+    <!-- 搜索结果区 -->
     <div id="resultsArea" class="hidden">
       <div class="flex justify-between items-center mb-5">
-        <p id="resultSummary" class="text-xs text-gray-400 dark:text-gray-500 font-medium"></p>
+        <p id="resultSummary" class="text-xs text-gray-400 font-medium"></p>
         <button onclick="clearSearch()" class="text-xs text-accent-500 hover:text-accent-400 font-medium transition">清除搜索</button>
       </div>
       <div id="results" class="space-y-3"></div>
@@ -161,311 +142,297 @@
         <button onclick="toggleFavorites()" class="text-xs text-accent-500 hover:text-accent-400 font-medium transition">返回搜索</button>
       </div>
       <div id="favList" class="space-y-3"></div>
-      <p id="favEmpty" class="text-center text-gray-400 dark:text-gray-600 py-16 hidden">还没有收藏任何论文<br><span class="text-xs">搜索后点击书签图标即可收藏</span></p>
+      <p id="favEmpty" class="text-center text-gray-400 py-16 hidden">还没有收藏任何论文<br><span class="text-xs">搜索后点击书签图标即可收藏</span></p>
     </div>
 
   </main>
 
-  <!-- 回到顶部 -->
-  <div id="scrollTopBtn" class="scroll-top-btn bg-white dark:bg-surface-800 text-gray-500 dark:text-gray-400 shadow-lg border border-gray-200/60 dark:border-gray-700/60 hover:border-accent-500/30 hover:text-accent-500 transition" onclick="window.scrollTo({top:0,behavior:'smooth'})">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>
-  </div>
+  <script>
+  // ===== 配置 =====
+  const DISCIPLINES = [
+    { label:'全部', value:'' },
+    { label:'计算机科学', value:'Computer Science' },
+    { label:'人工智能', value:'Artificial Intelligence' },
+    { label:'电子工程', value:'Engineering' },
+    { label:'生物医学', value:'Medicine' },
+    { label:'材料科学', value:'Materials Science' },
+    { label:'数学', value:'Mathematics' },
+    { label:'物理学', value:'Physics' },
+    { label:'化学', value:'Chemistry' }
+  ];
+  const PER_PAGE = 10;
+  let currentPage = 1, totalResults = 0, currentQuery = '';
+  let selectedDisc = '', isSearching = false, lastSearchTime = 0;
+  let favorites = JSON.parse(localStorage.getItem('polaris_favs') || '[]');
 
-  <!-- 底部 -->
-  <footer class="mt-20 border-t border-gray-200/50 dark:border-gray-800/50">
-    <div class="max-w-6xl mx-auto px-6 py-12">
-      <div class="grid md:grid-cols-3 gap-10">
-        <div>
-          <div class="flex items-center gap-2 mb-4">
-            <div class="w-6 h-6 rounded-md bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            </div>
-            <span class="font-bold text-sm">Polaris</span>
-          </div>
-          <p class="text-xs text-gray-400 dark:text-gray-600 leading-relaxed">深圳技术大学学术导航平台，整合全球开放获取学术资源，为师生提供一站式论文检索服务。</p>
-        </div>
-        <div>
-          <h4 class="font-semibold mb-4 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500">数据来源</h4>
-          <ul class="text-xs text-gray-400 dark:text-gray-500 space-y-2.5">
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-accent-400"></span>OpenAlex — 2.6亿+ 文献（CC0协议）</li>
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-accent-400"></span>Semantic Scholar — 2亿+ AI学术搜索</li>
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-accent-400"></span>全文链接均跳转至原始出版方</li>
-          </ul>
-        </div>
-        <div>
-          <h4 class="font-semibold mb-4 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500">合规声明</h4>
-          <ul class="text-xs text-gray-400 dark:text-gray-500 space-y-2.5">
-            <li class="flex items-center gap-2"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>仅聚合公开学术元数据</li>
-            <li class="flex items-center gap-2"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>不存储任何论文PDF全文</li>
-            <li class="flex items-center gap-2"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>不收集用户个人信息</li>
-          </ul>
-        </div>
-      </div>
-      <div class="mt-10 pt-6 border-t border-gray-200/50 dark:border-gray-800/50 text-center text-[11px] text-gray-300 dark:text-gray-700">
-        &copy; 2026 Polaris &middot; Shenzhen Technology University
-      </div>
-    </div>
-  </footer>
-
-<script>
-const DISCIPLINES = [
-  { name:'集成电路', query:'integrated circuit',
-    svg:'<path d="M6 4h12v16H6z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6 8H3m3 4H3m3 4H3m15-8h3m-3 4h3m-3 4h3M9 4V1m6 3V1m-6 19v3m6-3v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><rect x="9" y="9" width="6" height="6" rx="1" fill="currentColor" opacity=".15"/>' },
-  { name:'光电工程', query:'optical engineering',
-    svg:'<circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42m12.72-12.72l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' },
-  { name:'计算机科学', query:'computer science',
-    svg:'<rect x="2" y="3" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 21h8m-4-4v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7 8l3 3-3 3m5 0h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' },
-  { name:'自动化', query:'automation robotics',
-    svg:'<rect x="5" y="8" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="13" r="1.5" fill="currentColor" opacity=".3"/><circle cx="15" cy="13" r="1.5" fill="currentColor" opacity=".3"/><path d="M12 4v4M9 4h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' },
-  { name:'新能源', query:'renewable energy solar',
-    svg:'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>' },
-  { name:'材料科学', query:'materials science nanomaterials',
-    svg:'<path d="M12 2L2 7l10 5 10-5-10-5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>' },
-  { name:'生物医学工程', query:'biomedical engineering',
-    svg:'<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 11h8M12 7v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' },
-  { name:'智能制造', query:'intelligent manufacturing industry 4.0',
-    svg:'<path d="M1 20h22M4 20V8l5 4V8l5 4V4l5 4v12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' },
-];
-
-const PER_PAGE = 15;
-let currentPage = 1, currentQuery = '', allResults = [];
-
-function init() {
-  const tagContainer = document.getElementById('disciplineTags');
-  DISCIPLINES.forEach(d => {
-    const btn = document.createElement('button');
-    btn.className = 'disc-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium border border-gray-200/60 dark:border-gray-800 bg-white dark:bg-surface-800/40 text-gray-600 dark:text-gray-400 hover:border-accent-500/30 hover:text-accent-600 dark:hover:text-accent-400';
-    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" class="flex-shrink-0 opacity-60">${d.svg}</svg><span>${d.name}</span>`;
-    btn.onclick = () => {
-      document.querySelectorAll('.disc-btn').forEach(b => b.classList.remove('active-disc'));
-      btn.classList.add('active-disc');
-      document.getElementById('searchInput').value = d.query;
-      doSearch(1);
-    };
-    tagContainer.appendChild(btn);
-  });
-
-  if (localStorage.getItem('polaris-dark') === 'true') {
-    document.documentElement.classList.add('dark');
-    document.getElementById('iconMoon').classList.add('hidden');
-    document.getElementById('iconSun').classList.remove('hidden');
-  }
-  updateFavCount();
-  window.addEventListener('scroll', () => {
-    document.getElementById('scrollTopBtn').classList.toggle('show', window.scrollY > 400);
-  });
-}
-
-function fixUrl(work) {
-  if (work.open_access?.oa_url) return work.open_access.oa_url;
-  if (work.doi) {
-    const doi = work.doi.replace(/^https?:\/\/doi\.org\//, '').replace(/^doi:/, '');
-    return `https://doi.org/${doi}`;
-  }
-  if (work.primary_location?.landing_page_url) {
-    const url = work.primary_location.landing_page_url;
-    if (url && url.startsWith('http') && !url.includes('example.com')) return url;
-  }
-  return null;
-}
-
-function fixUrlSS(paper) {
-  if (paper.openAccessPdf?.url) return paper.openAccessPdf.url;
-  if (paper.url && paper.url.startsWith('http')) return paper.url;
-  return null;
-}
-
-async function doSearch(page = 1) {
-  const query = document.getElementById('searchInput').value.trim();
-  if (!query) return;
-  currentQuery = query;
-  currentPage = page;
-  const sort = document.getElementById('sortSelect').value;
-  const oaOnly = document.getElementById('oaOnly').checked;
-
-  document.getElementById('resultsArea').classList.remove('hidden');
-  document.getElementById('favoritesPanel').classList.add('hidden');
-  document.getElementById('heroSection').classList.add('hidden');
-
-  const resultsDiv = document.getElementById('results');
-  resultsDiv.innerHTML = Array(4).fill(0).map(() => `
-    <div class="bg-white dark:bg-surface-800/40 rounded-xl border border-gray-200/60 dark:border-gray-800/60 p-5">
-      <div class="skeleton h-4 w-3/4 mb-3"></div>
-      <div class="skeleton h-3 w-1/2 mb-4"></div>
-      <div class="flex gap-2"><div class="skeleton h-5 w-14"></div><div class="skeleton h-5 w-18"></div></div>
-    </div>`).join('');
-  document.getElementById('pagination').innerHTML = '';
-
-  try {
-    const sortParam = sort === 'cited' ? 'cited_by_count:desc' : sort === 'date' ? 'publication_date:desc' : 'relevance_score:desc';
-    const oaFilter = oaOnly ? '&filter=open_access.is_oa:true' : '';
-    const offset = (page - 1) * PER_PAGE;
-
-    const [oaRes, ssRes] = await Promise.all([
-      fetch(`https://api.openalex.org/works?search=${encodeURIComponent(query)}&sort=${sortParam}&per_page=${PER_PAGE}&offset=${offset}${oaFilter}&mailto=user@example.com`).then(r => r.json()),
-      page === 1 ? fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&limit=10&fields=title,authors,year,citationCount,tldr,openAccessPdf,url,venue`).then(r => r.json()).catch(() => ({data:[]})) : Promise.resolve({data:[]})
-    ]);
-
-    allResults = [];
-    const seen = new Set();
-
-    (oaRes.results || []).forEach(w => {
-      const t = w.title?.toLowerCase();
-      if (!t || seen.has(t)) return;
-      seen.add(t);
-      allResults.push({
-        title: w.title || 'Untitled', authors: w.authorships?.map(a => a.author.display_name) || [],
-        year: w.publication_year, citedBy: w.cited_by_count || 0, url: fixUrl(w),
-        isOA: w.open_access?.is_oa || false, oaUrl: w.open_access?.oa_url,
-        venue: w.primary_location?.source?.display_name || '', type: w.type || '', tldr: '', source: 'OpenAlex'
-      });
+  // ===== 初始化 =====
+  function init() {
+    renderDisciplineTags();
+    updateFavCount();
+    if (localStorage.getItem('polaris_dark') === '1') {
+      document.documentElement.classList.add('dark');
+      document.getElementById('iconMoon').classList.add('hidden');
+      document.getElementById('iconSun').classList.remove('hidden');
+    }
+    document.getElementById('searchInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSearch(1);
     });
+  }
 
-    (ssRes.data || []).forEach(p => {
-      const t = p.title?.toLowerCase();
-      if (!t || seen.has(t)) return;
-      seen.add(t);
-      allResults.push({
-        title: p.title || 'Untitled', authors: p.authors?.map(a => a.name) || [],
-        year: p.year, citedBy: p.citationCount || 0, url: fixUrlSS(p),
-        isOA: !!p.openAccessPdf, oaUrl: p.openAccessPdf?.url,
-        venue: p.venue || '', type: '', tldr: p.tldr?.text || '', source: 'Semantic Scholar'
-      });
+  // ===== 学科标签 =====
+  function renderDisciplineTags() {
+    const container = document.getElementById('disciplineTags');
+    container.innerHTML = DISCIPLINES.map((d, i) =>
+      `<button onclick="selectDisc('${d.value}', this)" class="px-3 py-1.5 rounded-lg text-xs font-medium border transition
+        ${i===0 ? 'border-accent-500/50 bg-accent-500/10 text-accent-600 dark:text-accent-400' : 'border-gray-200 dark:border-gray-700 text-gray-500 hover:border-accent-500/30 hover:text-accent-500'}"
+        data-disc="${d.value}">${d.label}</button>`
+    ).join('');
+  }
+
+  function selectDisc(value, el) {
+    selectedDisc = value;
+    document.querySelectorAll('#disciplineTags button').forEach(b => {
+      b.className = 'px-3 py-1.5 rounded-lg text-xs font-medium border transition border-gray-200 dark:border-gray-700 text-gray-500 hover:border-accent-500/30 hover:text-accent-500';
     });
-
-    if (sort === 'cited') allResults.sort((a,b) => b.citedBy - a.citedBy);
-
-    const total = oaRes.meta?.count || allResults.length;
-    document.getElementById('resultSummary').textContent = `${total.toLocaleString()} 条结果 · 第 ${page} 页`;
-    renderResults(allResults);
-    renderPagination(total, page);
-    window.scrollTo({ top: document.getElementById('searchBox').offsetTop - 80, behavior: 'smooth' });
-  } catch (err) {
-    resultsDiv.innerHTML = `<div class="text-center py-16"><p class="text-red-400 font-medium text-sm">检索出错</p><p class="text-xs text-gray-400 mt-2">${err.message}</p><button onclick="doSearch(1)" class="mt-4 px-4 py-2 bg-accent-500 text-white rounded-lg text-xs">重试</button></div>`;
+    el.className = 'px-3 py-1.5 rounded-lg text-xs font-medium border transition border-accent-500/50 bg-accent-500/10 text-accent-600 dark:text-accent-400';
   }
-}
 
-function renderResults(papers) {
-  const div = document.getElementById('results');
-  if (!papers.length) {
-    div.innerHTML = '<div class="text-center py-16 text-gray-400 dark:text-gray-600"><p class="text-sm mb-1">未找到相关论文</p><p class="text-xs">请尝试其他关键词</p></div>';
-    return;
-  }
-  div.innerHTML = papers.map((p, i) => {
-    const isFav = isFavorited(p.title);
-    const hasUrl = p.url && p.url.startsWith('http');
-    return `
-    <div class="bg-white dark:bg-surface-800/40 rounded-xl border border-gray-200/60 dark:border-gray-800/60 p-5 card-hover fade-up" style="animation-delay:${i*30}ms">
-      <div class="flex justify-between items-start gap-3">
-        <div class="flex-1 min-w-0">
-          ${hasUrl
-            ? `<a href="${p.url}" target="_blank" rel="noopener" class="font-medium text-sm leading-snug text-gray-900 dark:text-gray-100 hover:text-accent-500 transition line-clamp-2">${p.title}</a>`
-            : `<span class="font-medium text-sm leading-snug text-gray-500 dark:text-gray-400 line-clamp-2">${p.title}</span>`
-          }
-        </div>
-        <button onclick="toggleFav('${escapeStr(p.title)}', this)" class="flex-shrink-0 w-7 h-7 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center transition" title="${isFav?'取消收藏':'收藏'}">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="${isFav?'currentColor':'none'}" stroke="currentColor" stroke-width="2" class="${isFav?'text-accent-500':'text-gray-300 dark:text-gray-600'}"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-        </button>
-      </div>
-      <p class="text-xs text-gray-400 dark:text-gray-600 mt-2 truncate">${p.authors.slice(0,4).join(', ')}${p.authors.length>4?' et al.':''}</p>
-      <div class="flex flex-wrap items-center gap-1.5 mt-3">
-        ${p.year ? `<span class="tag bg-gray-100 dark:bg-gray-800/60 text-gray-500 dark:text-gray-500 border border-gray-200/40 dark:border-gray-700/40">${p.year}</span>` : ''}
-        <span class="tag bg-accent-500/5 dark:bg-accent-500/10 text-accent-600 dark:text-accent-400 border border-accent-500/10 dark:border-accent-500/15">引用 ${p.citedBy}</span>
-        ${p.venue ? `<span class="tag bg-gray-100 dark:bg-gray-800/60 text-gray-500 dark:text-gray-500 border border-gray-200/40 dark:border-gray-700/40 truncate max-w-[180px]" title="${p.venue}">${p.venue}</span>` : ''}
-        ${p.isOA ? `<a href="${p.oaUrl||p.url}" target="_blank" rel="noopener" class="tag bg-emerald-500/5 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/10 dark:border-emerald-500/15 hover:opacity-80 transition">开放获取</a>` : ''}
-        ${hasUrl ? `<a href="${p.url}" target="_blank" rel="noopener" class="link-badge border border-gray-200/60 dark:border-gray-700/60 text-gray-400 dark:text-gray-500">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          原文</a>` : '<span class="tag bg-gray-50 dark:bg-gray-800/40 text-gray-300 dark:text-gray-700 border border-gray-200/30 dark:border-gray-800">暂无链接</span>'}
-      </div>
-      ${p.tldr ? `<div class="mt-3 text-xs text-gray-500 dark:text-gray-500 leading-relaxed bg-gray-50/50 dark:bg-surface-900/40 rounded-lg p-3 border border-gray-100 dark:border-gray-800/40">${p.tldr}</div>` : ''}
-    </div>`;
-  }).join('');
-}
+  // ===== 搜索 =====
+  async function doSearch(page = 1) {
+    const query = document.getElementById('searchInput').value.trim();
+    if (!query) return;
+    const now = Date.now();
+    if (now - lastSearchTime < 1200) return;
+    lastSearchTime = now;
+    if (isSearching) return;
 
-function renderPagination(total, current) {
-  const totalPages = Math.min(Math.ceil(total / PER_PAGE), 20);
-  if (totalPages <= 1) { document.getElementById('pagination').innerHTML = ''; return; }
-  const div = document.getElementById('pagination');
-  let html = '';
-  const base = 'px-3 py-1.5 rounded-md text-xs font-medium transition';
-  if (current > 1) html += `<button onclick="doSearch(${current-1})" class="${base} bg-white dark:bg-surface-800 border border-gray-200/60 dark:border-gray-800 text-gray-500 hover:border-accent-500/30 hover:text-accent-500">上一页</button>`;
-  for (let i = Math.max(1,current-2); i <= Math.min(totalPages,current+2); i++) {
-    html += `<button onclick="doSearch(${i})" class="${base} ${i===current?'bg-accent-500 text-white shadow-sm':'bg-white dark:bg-surface-800 border border-gray-200/60 dark:border-gray-800 text-gray-500 hover:border-accent-500/30 hover:text-accent-500'}">${i}</button>`;
-  }
-  if (current < totalPages) html += `<button onclick="doSearch(${current+1})" class="${base} bg-white dark:bg-surface-800 border border-gray-200/60 dark:border-gray-800 text-gray-500 hover:border-accent-500/30 hover:text-accent-500">下一页</button>`;
-  div.innerHTML = html;
-}
+    isSearching = true;
+    currentPage = page;
+    currentQuery = query;
+    const btn = document.getElementById('searchBtn');
+    btn.textContent = '搜索中...';
+    btn.disabled = true;
 
-function getFavs() { return JSON.parse(localStorage.getItem('polaris-favs') || '[]'); }
-function saveFavs(favs) { localStorage.setItem('polaris-favs', JSON.stringify(favs)); updateFavCount(); }
-function isFavorited(title) { return getFavs().some(f => f.title === title); }
-function escapeStr(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"'); }
-
-function toggleFav(title, btn) {
-  let favs = getFavs();
-  const idx = favs.findIndex(f => f.title === title);
-  const svg = btn.querySelector('svg');
-  if (idx >= 0) {
-    favs.splice(idx, 1);
-    svg.setAttribute('fill', 'none');
-    svg.classList.remove('text-accent-500'); svg.classList.add('text-gray-300','dark:text-gray-600');
-  } else {
-    const paper = allResults.find(p => p.title === title);
-    if (paper) favs.push(paper);
-    svg.setAttribute('fill', 'currentColor');
-    svg.classList.add('text-accent-500'); svg.classList.remove('text-gray-300','dark:text-gray-600');
-  }
-  saveFavs(favs);
-}
-
-function toggleFavorites() {
-  const panel = document.getElementById('favoritesPanel');
-  if (panel.classList.contains('hidden')) {
-    panel.classList.remove('hidden');
-    document.getElementById('resultsArea').classList.add('hidden');
     document.getElementById('heroSection').classList.add('hidden');
-    document.getElementById('searchBox').classList.add('hidden');
-    renderFavList();
-  } else { clearSearch(); }
-}
+    document.getElementById('favoritesPanel').classList.add('hidden');
+    document.getElementById('resultsArea').classList.remove('hidden');
+    document.getElementById('results').innerHTML = renderSkeletons();
+    document.getElementById('pagination').innerHTML = '';
 
-function renderFavList() {
-  const favs = getFavs();
-  const list = document.getElementById('favList');
-  const empty = document.getElementById('favEmpty');
-  if (!favs.length) { list.innerHTML = ''; empty.classList.remove('hidden'); return; }
-  empty.classList.add('hidden');
-  allResults = favs;
-  renderResults(favs);
-  list.innerHTML = document.getElementById('results').innerHTML;
-}
+    try {
+      const offset = (page - 1) * PER_PAGE;
+      const sort = document.getElementById('sortSelect').value;
+      const oaOnly = document.getElementById('oaOnly').checked;
+      let url = `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&offset=${offset}&limit=${PER_PAGE}&fields=title,authors,year,citationCount,tldr,openAccessPdf,url,venue,abstract,externalIds`;
+      if (selectedDisc) url += `&fieldsOfStudy=${encodeURIComponent(selectedDisc)}`;
+      if (oaOnly) url += `&openAccessPdf=`;
+      if (sort === 'citationCount') url += `&sort=citationCount:desc`;
+      else if (sort === 'publicationDate') url += `&sort=publicationDate:desc`;
 
-function updateFavCount() {
-  const count = getFavs().length;
-  const badge = document.getElementById('favCount');
-  badge.textContent = count;
-  badge.classList.toggle('hidden', count === 0);
-}
+      const res = await fetch(url);
+      if (res.status === 429) {
+        throw new Error('请求过于频繁，请稍等一分钟后再试。Semantic Scholar 对未认证用户有速率限制。');
+      }
+      if (!res.ok) throw new Error(`请求失败 (${res.status})，请稍后重试。`);
+      const data = await res.json();
+      totalResults = data.total || 0;
+      renderResults(data.data || []);
+      renderPagination();
+    } catch (err) {
+      document.getElementById('results').innerHTML = `
+        <div class="rounded-xl p-6 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/30 text-center fade-up">
+          <p class="text-red-600 dark:text-red-400 text-sm font-medium">⚠️ ${err.message}</p>
+          <p class="text-red-400 dark:text-red-500 text-xs mt-2">建议：等待60秒后重试，或申请 API Key 获得更高速率</p>
+        </div>`;
+    } finally {
+      isSearching = false;
+      btn.textContent = '检索';
+      btn.disabled = false;
+    }
+  }
 
-function toggleDark() {
-  document.documentElement.classList.toggle('dark');
-  const isDark = document.documentElement.classList.contains('dark');
-  localStorage.setItem('polaris-dark', isDark);
-  document.getElementById('iconMoon').classList.toggle('hidden', isDark);
-  document.getElementById('iconSun').classList.toggle('hidden', !isDark);
-}
+  // ===== 渲染结果 =====
+  function renderResults(papers) {
+    const summary = document.getElementById('resultSummary');
+    summary.textContent = `共找到约 ${totalResults.toLocaleString()} 条结果`;
+    if (!papers.length) {
+      document.getElementById('results').innerHTML = `
+        <div class="text-center py-16 text-gray-400 fade-up">
+          <p class="text-lg mb-2">未找到相关论文</p>
+          <p class="text-sm">尝试更换关键词或使用英文搜索</p>
+        </div>`;
+      return;
+    }
+    document.getElementById('results').innerHTML = papers.map((p, i) => {
+      const isFav = favorites.some(f => f.paperId === p.paperId);
+      const authors = (p.authors || []).slice(0, 3).map(a => a.name).join(', ');
+      const moreAuthors = (p.authors || []).length > 3 ? ` +${p.authors.length - 3}` : '';
+      const year = p.year || '';
+      const venue = p.venue || '';
+      const citations = p.citationCount != null ? p.citationCount.toLocaleString() : '—';
+      const tldr = p.tldr?.text || p.abstract?.substring(0, 200) || '';
+      const hasPdf = !!p.openAccessPdf?.url;
+      const doi = p.externalIds?.DOI || '';
+      return `
+        <div class="bg-white dark:bg-surface-800/40 rounded-xl border border-gray-200/60 dark:border-gray-800/60 p-5 card-hover fade-up" style="animation-delay:${i*50}ms">
+          <div class="flex justify-between items-start gap-3">
+            <div class="flex-1 min-w-0">
+              <h3 class="font-semibold text-sm leading-snug mb-2 line-clamp-2">
+                ${p.url ? `<a href="${p.url}" target="_blank" class="hover:text-accent-500 transition">${escHtml(p.title)}</a>` : escHtml(p.title)}
+              </h3>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-400 mb-2">
+                ${authors ? `<span class="truncate max-w-[200px]">${escHtml(authors)}${moreAuthors}</span>` : ''}
+                ${year ? `<span>${year}</span>` : ''}
+                ${venue ? `<span class="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-500">${escHtml(venue)}</span>` : ''}
+              </div>
+              ${tldr ? `<p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 mb-3">${escHtml(tldr)}</p>` : ''}
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 text-[11px] font-medium">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                  ${citations} 引用
+                </span>
+                ${hasPdf ? `<a href="${p.openAccessPdf.url}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-[11px] font-medium hover:opacity-80 transition">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  PDF</a>` : ''}
+                ${doi ? `<a href="https://doi.org/${doi}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[11px] font-medium hover:opacity-80 transition">DOI</a>` : ''}
+              </div>
+            </div>
+            <button onclick="toggleFav('${p.paperId}', this)" class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700/50 transition ${isFav ? 'text-accent-500' : 'text-gray-300 dark:text-gray-600'}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            </button>
+          </div>
+        </div>`;
+    }).join('');
+  }
 
-function clearSearch() {
-  document.getElementById('searchInput').value = '';
-  document.getElementById('resultsArea').classList.add('hidden');
-  document.getElementById('favoritesPanel').classList.add('hidden');
-  document.getElementById('heroSection').classList.remove('hidden');
-  document.getElementById('searchBox').classList.remove('hidden');
-  document.querySelectorAll('.disc-btn').forEach(b => b.classList.remove('active-disc'));
-}
+  // ===== 分页 =====
+  function renderPagination() {
+    const totalPages = Math.min(Math.ceil(totalResults / PER_PAGE), 100);
+    if (totalPages <= 1) { document.getElementById('pagination').innerHTML = ''; return; }
+    let pages = [];
+    const start = Math.max(1, currentPage - 2);
+    const end = Math.min(totalPages, currentPage + 2);
+    if (start > 1) { pages.push(1); if (start > 2) pages.push('...'); }
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (end < totalPages) { if (end < totalPages - 1) pages.push('...'); pages.push(totalPages); }
 
-document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(1); });
-init();
-</script>
+    document.getElementById('pagination').innerHTML = pages.map(p =>
+      p === '...' ? `<span class="w-8 h-8 flex items-center justify-center text-gray-400 text-xs">…</span>` :
+      `<button onclick="doSearch(${p})" class="w-8 h-8 rounded-lg text-xs font-medium transition
+        ${p === currentPage ? 'bg-accent-500 text-white shadow-sm' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500'}">${p}</button>`
+    ).join('');
+  }
+
+  // ===== 骨架屏 =====
+  function renderSkeletons() {
+    return Array(5).fill('').map(() => `
+      <div class="bg-white dark:bg-surface-800/40 rounded-xl border border-gray-200/60 dark:border-gray-800/60 p-5">
+        <div class="skeleton h-4 w-3/4 mb-3"></div>
+        <div class="skeleton h-3 w-1/2 mb-2"></div>
+        <div class="skeleton h-3 w-full mb-2"></div>
+        <div class="skeleton h-3 w-2/3"></div>
+      </div>`).join('');
+  }
+
+  // ===== 收藏 =====
+  function toggleFav(paperId, btn) {
+    const idx = favorites.findIndex(f => f.paperId === paperId);
+    if (idx >= 0) {
+      favorites.splice(idx, 1);
+      btn.classList.remove('text-accent-500');
+      btn.classList.add('text-gray-300', 'dark:text-gray-600');
+      btn.querySelector('svg').setAttribute('fill', 'none');
+    } else {
+      const card = btn.closest('.card-hover') || btn.closest('[class*="bg-white"]');
+      const title = card?.querySelector('h3')?.textContent?.trim() || '';
+      const authors = card?.querySelector('.text-\\[11px\\]')?.textContent?.trim() || '';
+      favorites.push({ paperId, title, authors, time: Date.now() });
+      btn.classList.add('text-accent-500');
+      btn.classList.remove('text-gray-300', 'dark:text-gray-600');
+      btn.querySelector('svg').setAttribute('fill', 'currentColor');
+    }
+    localStorage.setItem('polaris_favs', JSON.stringify(favorites));
+    updateFavCount();
+  }
+
+  function updateFavCount() {
+    const el = document.getElementById('favCount');
+    if (favorites.length > 0) {
+      el.textContent = favorites.length;
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  }
+
+  function toggleFavorites() {
+    const panel = document.getElementById('favoritesPanel');
+    const results = document.getElementById('resultsArea');
+    const hero = document.getElementById('heroSection');
+    const searchBox = document.getElementById('searchBox');
+
+    if (!panel.classList.contains('hidden')) {
+      panel.classList.add('hidden');
+      hero.classList.remove('hidden');
+      return;
+    }
+    hero.classList.add('hidden');
+    results.classList.add('hidden');
+    panel.classList.remove('hidden');
+
+    const list = document.getElementById('favList');
+    const empty = document.getElementById('favEmpty');
+    if (!favorites.length) {
+      list.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    list.innerHTML = favorites.map((f, i) => `
+      <div class="bg-white dark:bg-surface-800/40 rounded-xl border border-gray-200/60 dark:border-gray-800/60 p-4 fade-up" style="animation-delay:${i*50}ms">
+        <div class="flex justify-between items-start">
+          <div class="flex-1 min-w-0">
+            <h3 class="font-semibold text-sm mb-1 line-clamp-2">${escHtml(f.title)}</h3>
+            <p class="text-[11px] text-gray-400 truncate">${escHtml(f.authors)}</p>
+          </div>
+          <button onclick="removeFav('${f.paperId}')" class="text-gray-300 hover:text-red-400 transition ml-2 flex-shrink-0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>`).join('');
+  }
+
+  function removeFav(paperId) {
+    favorites = favorites.filter(f => f.paperId !== paperId);
+    localStorage.setItem('polaris_favs', JSON.stringify(favorites));
+    updateFavCount();
+    toggleFavorites();
+    toggleFavorites();
+  }
+
+  // ===== 工具函数 =====
+  function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('resultsArea').classList.add('hidden');
+    document.getElementById('heroSection').classList.remove('hidden');
+    document.getElementById('pagination').innerHTML = '';
+  }
+
+  function toggleDark() {
+    const html = document.documentElement;
+    html.classList.toggle('dark');
+    const isDark = html.classList.contains('dark');
+    localStorage.setItem('polaris_dark', isDark ? '1' : '0');
+    document.getElementById('iconMoon').classList.toggle('hidden', isDark);
+    document.getElementById('iconSun').classList.toggle('hidden', !isDark);
+  }
+
+  function escHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  init();
+  </script>
 </body>
 </html>
