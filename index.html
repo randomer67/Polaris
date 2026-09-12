@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -297,11 +298,17 @@ async function doSearch(page = 1) {
   document.getElementById('pagination').innerHTML = '';
 
   try {
-    const sortParam = sort === 'cited' ? 'cited_by_count:desc' : sort === 'date' ? 'publication_date:desc' : 'relevance:desc';
+    const sortParam = sort === 'cited' ? 'cited_by_count:desc' : sort === 'date' ? 'publication_year:desc' : 'relevance:desc';
     const oaFilter = oaOnly ? '&filter=open_access.is_oa:true' : '';
     const offset = (page - 1) * PER_PAGE;
 
-    const oaRes = await fetch(`https://api.openalex.org/works?search=${encodeURIComponent(query)}&sort=${sortParam}&per_page=${PER_PAGE}&offset=${offset}${oaFilter}&mailto=user@example.com`).then(r => r.json());
+    const oaFetch = await fetch(`https://api.openalex.org/works?search=${encodeURIComponent(query)}&sort=${sortParam}&per_page=${PER_PAGE}&offset=${offset}${oaFilter}&mailto=user@example.com`);
+    if (!oaFetch.ok) {
+      if (oaFetch.status === 429) throw new Error('请求太频繁，请稍等 30 秒后再试');
+      if (oaFetch.status === 400) throw new Error('搜索参数有误，请检查关键词后重试');
+      throw new Error('搜索服务暂时不可用，请稍后重试');
+    }
+    const oaRes = await oaFetch.json();
     const ssRes = { data: [] };
 
     allResults = [];
