@@ -48,6 +48,7 @@
     .link-badge { display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:5px;font-size:11px;font-weight:500;transition:all .15s;text-decoration:none; }
     .link-badge:hover { background: rgba(45,212,191,.1); border-color: rgba(45,212,191,.3); color: #2dd4bf; }
     .input-focus:focus { border-color: rgba(45,212,191,.5); box-shadow: 0 0 0 3px rgba(45,212,191,.1); }
+    .match-hl { background: rgba(45,212,191,.18); color: inherit; padding: 0 2px; border-radius: 3px; }
   </style>
 </head>
 <body class="bg-surface-50 dark:bg-surface-950 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
@@ -129,9 +130,9 @@
         <div class="flex items-center gap-2">
           <label class="text-gray-400 dark:text-gray-500 text-[11px] font-medium uppercase tracking-wider">排序</label>
           <select id="sortSelect" class="bg-gray-50 dark:bg-surface-900/60 border border-gray-200/60 dark:border-gray-800 rounded-lg px-3 py-1.5 text-xs outline-none cursor-pointer">
+            <option value="relevance">相关度</option>
             <option value="cited">引用量最高</option>
             <option value="date">最新发布</option>
-            <option value="relevance">相关度</option>
           </select>
         </div>
         <label class="flex items-center gap-2 cursor-pointer select-none">
@@ -140,7 +141,7 @@
         </label>
       </div>
       <p class="text-[11px] text-gray-400 dark:text-gray-600 mt-3 leading-relaxed">
-        提示：中文关键词会自动映射为英文学术术语（如「集成电路」→ integrated circuit）；英文关键词直接检索，结果更精准。
+        中文会自动补全为完整学术术语（如「集成」→「集成电路」→ integrated circuit），结果只保留标题或摘要中真正命中的论文。
       </p>
     </div>
 
@@ -211,51 +212,79 @@
 
 <script>
 const DISCIPLINES = [
-  { name:'集成电路', query:'integrated circuit', en:'integrated circuit',
+  { name:'集成电路', query:'集成电路',
     svg:'<path d="M6 4h12v16H6z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6 8H3m3 4H3m3 4H3m15-8h3m-3 4h3m-3 4h3M9 4V1m6 3V1m-6 19v3m6-3v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><rect x="9" y="9" width="6" height="6" rx="1" fill="currentColor" opacity=".15"/>' },
-  { name:'光电工程', query:'optical engineering', en:'optical engineering',
+  { name:'光电工程', query:'光电工程',
     svg:'<circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42m12.72-12.72l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' },
-  { name:'计算机科学', query:'computer science', en:'computer science',
+  { name:'计算机科学', query:'计算机科学',
     svg:'<rect x="2" y="3" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 21h8m-4-4v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7 8l3 3-3 3m5 0h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' },
-  { name:'自动化', query:'automation robotics', en:'automation robotics',
+  { name:'自动化', query:'自动化',
     svg:'<rect x="5" y="8" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="13" r="1.5" fill="currentColor" opacity=".3"/><circle cx="15" cy="13" r="1.5" fill="currentColor" opacity=".3"/><path d="M12 4v4M9 4h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' },
-  { name:'新能源', query:'renewable energy solar', en:'renewable energy',
+  { name:'新能源', query:'新能源',
     svg:'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>' },
-  { name:'材料科学', query:'materials science nanomaterials', en:'materials science',
+  { name:'材料科学', query:'材料科学',
     svg:'<path d="M12 2L2 7l10 5 10-5-10-5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>' },
-  { name:'生物医学工程', query:'biomedical engineering', en:'biomedical engineering',
+  { name:'生物医学工程', query:'生物医学工程',
     svg:'<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 11h8M12 7v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' },
-  { name:'智能制造', query:'intelligent manufacturing', en:'intelligent manufacturing',
+  { name:'智能制造', query:'智能制造',
     svg:'<path d="M1 20h22M4 20V8l5 4V8l5 4V4l5 4v12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' },
 ];
 
 /* ============================================================
-   中文→英文学术术语映射表
-   中文关键词先经过这里翻译，再送给 OpenAlex
-   匹配策略：精确匹配 > 最长子串匹配
+   中文 → 英文学术术语映射（全部指向完整学术术语，不用泛词）
    ============================================================ */
 const CN_EN_MAP = {
+  // 电子/集成电路
   '集成电路':'integrated circuit','芯片':'chip','半导体':'semiconductor','微电子':'microelectronics',
+  '模拟电路':'analog circuit','数字电路':'digital circuit','电路设计':'circuit design',
+  '系统集成':'system integration','集成':'integrated circuit',          // 短词直接给完整学术术语
+
+  // 计算机
   '互联网':'internet','网络':'network','计算机网络':'computer network','物联网':'internet of things',
-  '计算机':'computer','电脑':'computer','软件':'software','硬件':'hardware','算法':'algorithm',
+  '计算机':'computer','软件':'software','算法':'algorithm','数据结构':'data structure',
   '人工智能':'artificial intelligence','机器学习':'machine learning','深度学习':'deep learning',
   '神经网络':'neural network','自然语言处理':'natural language processing','计算机视觉':'computer vision',
   '大数据':'big data','云计算':'cloud computing','区块链':'blockchain','数据挖掘':'data mining',
-  '光电':'optoelectronics','光学':'optics','激光':'laser','光子':'photonics','光纤':'optical fiber',
-  '新能源':'renewable energy','太阳能':'solar energy','风能':'wind energy','电池':'battery','储能':'energy storage',
-  '材料':'materials','纳米':'nanomaterials','石墨烯':'graphene','高分子':'polymer','复合材料':'composite',
-  '生物医学':'biomedical','医疗':'medical','药物':'drug','基因':'gene','蛋白质':'protein','细胞':'cell',
-  '自动化':'automation','机器人':'robotics','控制':'control','无人驾驶':'autonomous driving','自动驾驶':'autonomous driving',
+  '网络安全':'cybersecurity','信息安全':'information security','操作系统':'operating system',
+  '数据库':'database','计算机科学':'computer science','软件工程':'software engineering',
+
+  // 光电
+  '光电工程':'optical engineering','光电':'optoelectronics','光学':'optics','激光':'laser',
+  '光子':'photonics','光纤':'optical fiber','光通信':'optical communication','光电子':'optoelectronic',
+
+  // 新能源
+  '新能源':'renewable energy','太阳能':'solar energy','风能':'wind energy','光伏':'photovoltaic',
+  '电池':'battery','锂电池':'lithium battery','储能':'energy storage','燃料电池':'fuel cell',
+
+  // 材料
+  '材料科学':'materials science','材料':'materials','纳米':'nanomaterials','石墨烯':'graphene',
+  '高分子':'polymer','复合材料':'composite material','金属材料':'metal material','二维材料':'two-dimensional materials',
+
+  // 生物医学
+  '生物医学工程':'biomedical engineering','生物医学':'biomedical','医疗':'medical','药物':'drug',
+  '基因':'gene','蛋白质':'protein','细胞':'cell','医学影像':'medical imaging','生物材料':'biomaterials',
+
+  // 自动化/控制
+  '自动化':'automation','机器人':'robotics','控制':'control system','无人驾驶':'autonomous driving',
+  '自动驾驶':'autonomous driving','无人机':'unmanned aerial vehicle','控制系统':'control system',
+
+  // 制造
   '智能制造':'intelligent manufacturing','工业':'industrial','制造':'manufacturing','供应链':'supply chain',
-  '通信':'communication','信号':'signal','无线':'wireless','5G':'5G','天线':'antenna',
-  '量子':'quantum','物理':'physics','化学':'chemistry','数学':'mathematics','生物':'biology','医学':'medicine',
-  '环境':'environment','能源':'energy','电力':'electric power','机械':'mechanical','电子':'electronic',
-  '虚拟现实':'virtual reality','增强现实':'augmented reality','图像':'image','语音':'speech',
-  '集成':'integration','系统':'system','检测':'detection','识别':'recognition','优化':'optimization',
-  '网络安全':'cybersecurity','信息安全':'information security','隐私':'privacy','加密':'encryption',
+  '增材制造':'additive manufacturing','3D打印':'3D printing','机械工程':'mechanical engineering',
+
+  // 通信/信号
+  '通信':'communication','信号处理':'signal processing','无线':'wireless','天线':'antenna',
+  '5G':'5G','雷达':'radar','遥感':'remote sensing',
+
+  // 基础学科
+  '量子':'quantum','物理':'physics','化学':'chemistry','数学':'mathematics','生物':'biology',
+  '环境':'environment','能源':'energy','电力':'electric power','电子':'electronic',
+  '虚拟现实':'virtual reality','增强现实':'augmented reality','图像处理':'image processing',
+  '语音识别':'speech recognition','模式识别':'pattern recognition',
 };
 
 let currentPage = 1, currentQuery = '', allResults = [], lastRawQuery = '';
+let lastTranslated = false, lastExpanded = false;
 const PER_PAGE = 15;
 
 function init() {
@@ -284,26 +313,54 @@ function init() {
   });
 }
 
-/* 判断字符串是否纯 ASCII（英文/数字/符号） */
 function isAscii(s) { return /^[\x00-\x7F]*$/.test(s); }
 
-/* 中文 → 英文翻译；返回 { query, translated, original } */
+/* ============================================================
+   翻译升级：支持“前缀扩展”
+   例：用户输入「集成」→ 自动向上补全为「集成电路」→ integrated circuit
+   而不是泛词 integration
+   ============================================================ */
+function findPrefixExpansion(input) {
+  // 在映射表中找“以 input 为前缀、且更长”的词，选最短的那个（最精确）
+  let best = null, bestLen = Infinity;
+  for (const cn of Object.keys(CN_EN_MAP)) {
+    if (cn.length > input.length && cn.startsWith(input) && cn.length < bestLen) {
+      best = cn; bestLen = cn.length;
+    }
+  }
+  // 避免扩得过远（差距 ≤ 4 个字符）
+  if (best && best.length - input.length <= 4) return best;
+  return null;
+}
+
 function translateQuery(raw) {
   const t = raw.trim();
   if (!t) return { query: '', translated: false, original: t };
   if (isAscii(t)) return { query: t, translated: false, original: t };
 
-  // 精确匹配
-  if (CN_EN_MAP[t]) return { query: CN_EN_MAP[t], translated: true, original: t };
+  // 1. 精确匹配 → 优先看是否有更长前缀术语
+  if (CN_EN_MAP[t]) {
+    const expanded = findPrefixExpansion(t);
+    if (expanded) {
+      return { query: CN_EN_MAP[expanded], translated: true, original: t, expandedTo: expanded };
+    }
+    return { query: CN_EN_MAP[t], translated: true, original: t };
+  }
 
-  // 最长子串匹配
+  // 2. 最长子串匹配（输入中包含某个已知术语）
   let best = null, bestLen = 0;
   for (const [cn, en] of Object.entries(CN_EN_MAP)) {
     if (t.includes(cn) && cn.length > bestLen) { best = en; bestLen = cn.length; }
   }
   if (best) return { query: best, translated: true, original: t };
 
-  // 无法翻译：保留原词，标记未翻译
+  // 3. 前缀扩展（用户输入是更长术语的开头）
+  const expanded = findPrefixExpansion(t);
+  if (expanded) {
+    return { query: CN_EN_MAP[expanded], translated: true, original: t, expandedTo: expanded };
+  }
+
+  // 4. 无法翻译
   return { query: t, translated: false, original: t, untranslated: true };
 }
 
@@ -320,11 +377,6 @@ function fixUrl(work) {
   return null;
 }
 
-/* ============================================================
-   核心修复 2：改用 title_and_abstract.search，缩小搜索范围
-   之前用 search= 是全文检索，会匹配到很多不相关的内容
-   现在只搜标题和摘要，再加上前端相关性过滤，结果一一对应
-   ============================================================ */
 function buildOpenAlexUrl(query, page, sort, oaOnly) {
   const filters = [];
   filters.push('title_and_abstract.search:' + encodeURIComponent(query));
@@ -342,25 +394,70 @@ function buildOpenAlexUrl(query, page, sort, oaOnly) {
   return 'https://api.openalex.org/works?' + parts.join('&');
 }
 
-/* 前端相关性过滤：标题或摘要必须至少命中一个查询词 */
+/* ============================================================
+   过滤升级：加权评分 + 严格命中
+   - 标题命中权重最高，摘要次之
+   - 要求全部查询词命中，否则降级
+   - 绝不出现“标题里根本没提这个词”的论文
+   ============================================================ */
+function scorePaper(paper, words) {
+  const title = (paper.title || '').toLowerCase();
+  const abstract = (paper.tldr || '').toLowerCase();
+  const venue = (paper.venue || '').toLowerCase();
+
+  let titleHits = 0, absHits = 0, venueHits = 0;
+  for (const w of words) {
+    if (title.includes(w)) titleHits++;
+    else if (abstract.includes(w)) absHits++;
+    else if (venue.includes(w)) venueHits++;
+  }
+
+  const total = words.length;
+  // 加权分：标题权重 3，摘要权重 1，期刊 0.5
+  const score = (titleHits * 3 + absHits * 1 + venueHits * 0.5) / (total * 3);
+  return { score, titleHits, absHits, total };
+}
+
 function filterRelevant(results, query) {
-  const words = query.toLowerCase().split(/\s+/).filter(w => w.length >= 3);
+  // 过滤掉过短的词（连词、介词、单字母）
+  const words = query.toLowerCase().split(/[\s,;，；]+/)
+    .map(w => w.replace(/[^\w\-]/g, ''))
+    .filter(w => w.length >= 3);
   if (!words.length) return results;
-  const filtered = results.filter(p => {
-    const text = ((p.title || '') + ' ' + (p.tldr || '') + ' ' + (p.venue || '')).toLowerCase();
-    return words.some(w => text.includes(w));
-  });
-  // 过滤后太少就回退到原结果，避免空结果
-  return filtered.length >= Math.min(3, results.length) ? filtered : results;
+
+  const scored = results.map(p => ({ paper: p, ...scorePaper(p, words) }));
+
+  // 严格档：全部词都在标题中；或全部词都在标题+摘要中
+  const strict = scored.filter(s =>
+    s.titleHits === s.total || (s.titleHits + s.absHits) === s.total
+  );
+  if (strict.length >= 3) {
+    return strict.sort((a, b) => b.score - a.score).map(s => s.paper);
+  }
+
+  // 中等档：标题至少命中一个词
+  const medium = scored.filter(s => s.titleHits >= 1);
+  if (medium.length >= 3) {
+    return medium.sort((a, b) => b.score - a.score).map(s => s.paper);
+  }
+
+  // 兜底：按分数排序，只保留分数 > 0 的
+  const any = scored.filter(s => s.score > 0).sort((a, b) => b.score - a.score);
+  if (any.length >= 3) return any.map(s => s.paper);
+
+  // 真的一条都没命中 → 返回空，触发“未找到”提示
+  return any.map(s => s.paper);
 }
 
 async function doSearch(page = 1) {
   const rawQuery = document.getElementById('searchInput').value.trim();
   if (!rawQuery) return;
   lastRawQuery = rawQuery;
-  const { query, translated, original, untranslated } = translateQuery(rawQuery);
-  currentQuery = query;
+  const tr = translateQuery(rawQuery);
+  currentQuery = tr.query;
   currentPage = page;
+  lastTranslated = tr.translated;
+  lastExpanded = !!tr.expandedTo;
   const sort = document.getElementById('sortSelect').value;
   const oaOnly = document.getElementById('oaOnly').checked;
 
@@ -378,27 +475,21 @@ async function doSearch(page = 1) {
   document.getElementById('pagination').innerHTML = '';
 
   try {
-    const url = buildOpenAlexUrl(query, page, sort, oaOnly);
-    console.log('[Polaris] 原始输入：', rawQuery, '→ 实际查询：', query);
-    console.log('[Polaris] 请求 URL：', url);
+    const url = buildOpenAlexUrl(tr.query, page, sort, oaOnly);
+    console.log('[Polaris] 原始输入：', rawQuery,
+      '→ 实际查询：', tr.query,
+      tr.expandedTo ? `（自动补全为「${tr.expandedTo}」）` : '');
 
     const oaFetch = await fetch(url, { headers: { 'Accept': 'application/json' } });
-
     if (!oaFetch.ok) {
       let detail = '';
-      try {
-        const errBody = await oaFetch.json();
-        detail = errBody.message || errBody.error || JSON.stringify(errBody);
-      } catch (_) {}
-      console.error('[Polaris] HTTP', oaFetch.status, detail || '(无详情)');
-      if (oaFetch.status === 400) throw new Error('搜索参数有误' + (detail ? '：' + detail : '，请检查关键词后重试'));
+      try { const e = await oaFetch.json(); detail = e.message || e.error || ''; } catch (_) {}
+      if (oaFetch.status === 400) throw new Error('搜索参数有误' + (detail ? '：' + detail : ''));
       if (oaFetch.status === 403) throw new Error('访问被拒绝，请稍后重试');
       if (oaFetch.status === 429) throw new Error('请求太频繁，请稍等 30 秒后再试');
-      throw new Error(`搜索服务暂时不可用（HTTP ${oaFetch.status}）` + (detail ? '：' + detail : ''));
+      throw new Error(`搜索服务暂时不可用（HTTP ${oaFetch.status}）`);
     }
-
     const oaRes = await oaFetch.json();
-    console.log('[Polaris] 接口返回总数：', oaRes.meta?.count);
 
     let collected = [];
     const seen = new Set();
@@ -421,21 +512,22 @@ async function doSearch(page = 1) {
       });
     });
 
-    // 前端相关性过滤
     const before = collected.length;
-    allResults = filterRelevant(collected, query);
+    allResults = filterRelevant(collected, tr.query);
     console.log('[Polaris] 相关性过滤：', before, '→', allResults.length);
 
     if (sort === 'cited') allResults.sort((a, b) => b.citedBy - a.citedBy);
+    else if (sort === 'date') allResults.sort((a, b) => (b.year || 0) - (a.year || 0));
 
-    const total = oaRes.meta?.count || allResults.length;
+    const total = allResults.length;
     let hint = '';
-    if (translated) hint = ` · 已将「${original}」翻译为 “${query}”`;
-    else if (untranslated) hint = ` · 未识别中文关键词，建议改用英文（如 “${original}” 的英文术语）`;
+    if (tr.expandedTo) hint = ` · 「${tr.original}」补全为「${tr.expandedTo}」(${tr.query})`;
+    else if (tr.translated) hint = ` · 「${tr.original}」→ “${tr.query}”`;
+    else if (tr.untranslated) hint = ` · 未识别中文，建议改用英文术语`;
 
     document.getElementById('resultSummary').textContent =
-      `${total.toLocaleString()} 条结果 · 第 ${page} 页${hint}`;
-    renderResults(allResults);
+      `${total.toLocaleString()} 条相关结果 · 第 ${page} 页${hint}`;
+    renderResults(allResults, tr.query);
     renderPagination(total, page);
     window.scrollTo({ top: document.getElementById('searchBox').offsetTop - 80, behavior: 'smooth' });
   } catch (err) {
@@ -452,22 +544,43 @@ async function doSearch(page = 1) {
   }
 }
 
-function renderResults(papers) {
+/* 在标题中高亮命中的查询词 */
+function highlightTitle(title, query) {
+  const words = query.toLowerCase().split(/[\s,;，；]+/)
+    .map(w => w.replace(/[^\w\-]/g, ''))
+    .filter(w => w.length >= 3);
+  if (!words.length) return title;
+  let out = title;
+  // 按长度倒序替换，避免短词先替换破坏长词
+  const sorted = [...new Set(words)].sort((a, b) => b.length - a.length);
+  for (const w of sorted) {
+    const re = new RegExp('(' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    out = out.replace(re, '<span class="match-hl">$1</span>');
+  }
+  return out;
+}
+
+function renderResults(papers, query) {
   const div = document.getElementById('results');
   if (!papers.length) {
-    div.innerHTML = '<div class="text-center py-16 text-gray-400 dark:text-gray-600"><p class="text-sm mb-1">未找到相关论文</p><p class="text-xs">请尝试其他关键词，或改用更通用的英文术语</p></div>';
+    div.innerHTML = `<div class="text-center py-16 text-gray-400 dark:text-gray-600">
+      <p class="text-sm mb-1">未找到严格匹配的论文</p>
+      <p class="text-xs mb-4">建议：换用更完整的学术术语，或改用英文关键词</p>
+      <p class="text-[11px] text-gray-300 dark:text-gray-700">例如：不要搜「集成」，试试「集成电路」或 integrated circuit</p>
+    </div>`;
     return;
   }
   div.innerHTML = papers.map((p, i) => {
     const isFav = isFavorited(p.title);
     const hasUrl = p.url && p.url.startsWith('http');
+    const highlighted = query ? highlightTitle(p.title, query) : p.title;
     return `
     <div class="bg-white dark:bg-surface-800/40 rounded-xl border border-gray-200/60 dark:border-gray-800/60 p-5 card-hover fade-up" style="animation-delay:${i*30}ms">
       <div class="flex justify-between items-start gap-3">
         <div class="flex-1 min-w-0">
           ${hasUrl
-            ? `<a href="${p.url}" target="_blank" rel="noopener" class="font-medium text-sm leading-snug text-gray-900 dark:text-gray-100 hover:text-accent-500 transition line-clamp-2">${p.title}</a>`
-            : `<span class="font-medium text-sm leading-snug text-gray-500 dark:text-gray-400 line-clamp-2">${p.title}</span>`
+            ? `<a href="${p.url}" target="_blank" rel="noopener" class="font-medium text-sm leading-snug text-gray-900 dark:text-gray-100 hover:text-accent-500 transition line-clamp-2">${highlighted}</a>`
+            : `<span class="font-medium text-sm leading-snug text-gray-500 dark:text-gray-400 line-clamp-2">${highlighted}</span>`
           }
         </div>
         <button onclick="toggleFav('${escapeStr(p.title)}', this)" class="flex-shrink-0 w-7 h-7 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center transition" title="${isFav?'取消收藏':'收藏'}">
@@ -484,7 +597,6 @@ function renderResults(papers) {
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           原文</a>` : '<span class="tag bg-gray-50 dark:bg-gray-800/40 text-gray-300 dark:text-gray-700 border border-gray-200/30 dark:border-gray-800">暂无链接</span>'}
       </div>
-      ${p.tldr ? `<div class="mt-3 text-xs text-gray-500 dark:text-gray-500 leading-relaxed bg-gray-50/50 dark:bg-surface-900/40 rounded-lg p-3 border border-gray-100 dark:border-gray-800/40">${p.tldr}</div>` : ''}
     </div>`;
   }).join('');
 }
@@ -546,7 +658,7 @@ function renderFavList() {
   }
   empty.classList.add('hidden');
   allResults = favs;
-  renderResults(favs);
+  renderResults(favs, '');
   document.getElementById('favList').innerHTML = document.getElementById('results').innerHTML;
 }
 
