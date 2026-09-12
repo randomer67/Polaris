@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Polaris - SZTU全球顶级论文平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .loading-spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #3b82f6;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- 顶部导航 -->
+  <nav class="bg-blue-900 text-white p-4 shadow-lg">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <h1 class="text-xl font-bold">⭐ Polaris</h1>
+      <span class="text-sm opacity-80">SZTU · Where students meet the world's best research</span>
+    </div>
+  </nav>
+
+  <main class="max-w-6xl mx-auto p-6">
+    <!-- 学科入口 -->
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">选择你的学科方向</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="disciplines"></div>
+
+    <!-- 搜索框 -->
+    <div class="mt-10">
+      <div class="flex gap-2">
+        <input id="searchInput" type="text" placeholder="搜索论文标题、关键词、作者..."
+          class="flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+        <button onclick="search()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          检索
+        </button>
+      </div>
+      <p class="text-sm text-gray-500 mt-2">数据来源：OpenAlex（2.6亿+文献）、Semantic Scholar（2亿+文献），均为免费开放获取资源</p>
+    </div>
+
+    <!-- 搜索结果 -->
+    <div id="results" class="mt-6 space-y-4"></div>
+  </main>
+
+  <!-- 底部 -->
+  <footer class="mt-12 py-6 text-center text-sm text-gray-500 border-t">
+    <p>Polaris — 深圳技术大学学术导航平台</p>
+    <p class="mt-1">本平台仅聚合公开学术元数据，全文内容均跳转至原始出版方，不涉及任何版权内容存储</p>
+  </footer>
+
+  <script>
+    const disciplines = [
+      { name: '集成电路', icon: '🔬', query: 'integrated circuit' },
+      { name: '光电工程', icon: '💡', query: 'optical engineering' },
+      { name: '计算机科学', icon: '💻', query: 'computer science' },
+      { name: '自动化', icon: '🤖', query: 'automation control' },
+      { name: '新能源', icon: '⚡', query: 'renewable energy' },
+      { name: '材料科学', icon: '🧪', query: 'materials science' },
+      { name: '生物医学工程', icon: '🏥', query: 'biomedical engineering' },
+      { name: '智能制造', icon: '🏭', query: 'intelligent manufacturing' },
+    ];
+
+    const container = document.getElementById('disciplines');
+    disciplines.forEach(d => {
+      const card = document.createElement('div');
+      card.className = 'bg-white p-6 rounded-xl shadow hover:shadow-lg cursor-pointer transition text-center';
+      card.innerHTML = `<div class="text-4xl mb-2">${d.icon}</div><div class="font-semibold">${d.name}</div>`;
+      card.onclick = () => {
+        document.getElementById('searchInput').value = d.query;
+        search();
+      };
+      container.appendChild(card);
+    });
+
+    async function search() {
+      const query = document.getElementById('searchInput').value.trim();
+      if (!query) return alert('请输入搜索关键词');
+
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<div class="text-center py-8"><span class="loading-spinner"></span>检索中，请稍候...</div>';
+
+      try {
+        const [openAlexData, semanticData] = await Promise.all([
+          fetch(`https://api.openalex.org/works?search=${encodeURIComponent(query)}&sort=cited_by_count:desc&per_page=15&mailto=test@example.com`).then(r => r.json()),
+          fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&limit=10&fields=title,authors,year,citationCount,tldr,openAccessPdf,url`).then(r => r.json())
+        ]);
+
+        let allPapers = [];
+        const seenTitles = new Set();
+
+        (openAlexData.results || []).forEach(work => {
+          const title = work.title?.toLowerCase();
+          if (!title || seenTitles.has(title)) return;
+          seenTitles.add(title);
+          allPapers.push({
+            title: work.title,
+            authors: work.authorships?.slice(0, 3).map(a => a.author.display_name).join(', ') + (work.authorships?.length > 3 ? ' et al.' : ''),
+            year: work.publication_year,
+            citedBy: work.cited_by_count || 0,
+            url: work.doi ? `https://doi.org/${work.doi.replace('https://doi.org/', '')}` : work.primary_location?.landing_page_url,
+            isOA: work.open_access?.is_oa,
+            tldr: work.abstract_inverted_index ? '点击查看摘要' : ''
+          });
+        });
+
+        (semanticData.data || []).forEach(paper => {
+          const title = paper.title?.toLowerCase();
+          if (!title || seenTitles.has(title)) return;
+          seenTitles.add(title);
+          allPapers.push({
+            title: paper.title,
+            authors: paper.authors?.slice(0, 3).map(a => a.name).join(', ') + (paper.authors?.length > 3 ? ' et al.' : ''),
+            year: paper.year,
+            citedBy: paper.citationCount || 0,
+            url: paper.openAccessPdf?.url || paper.url,
+            isOA: !!paper.openAccessPdf,
+            tldr: paper.tldr?.text || ''
+          });
+        });
+
+        allPapers.sort((a, b) => b.citedBy - a.citedBy);
+
+        if (allPapers.length === 0) {
+          resultsDiv.innerHTML = '<p class="text-center text-gray-500 py-8">未找到相关论文，请尝试其他关键词</p>';
+          return;
+        }
+
+        resultsDiv.innerHTML = allPapers.map(paper => `
+          <div class="bg-white p-5 rounded-lg shadow hover:shadow-md transition">
+            <h3 class="font-bold text-lg text-blue-800">
+              <a href="${paper.url || '#'}" target="_blank" class="hover:underline">${paper.title}</a>
+            </h3>
+            <p class="text-sm text-gray-500 mt-1">${paper.authors} · ${paper.year || '未知年份'} · 引用 ${paper.citedBy} 次</p>
+            ${paper.tldr ? `<p class="text-sm text-gray-600 mt-2">${paper.tldr}</p>` : ''}
+            <div class="flex gap-2 mt-2">
+              ${paper.isOA ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">开放获取</span>' : ''}
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        resultsDiv.innerHTML = `<p class="text-red-500 text-center py-8">检索出错：${err.message}，请稍后重试</p>`;
+      }
+    }
+
+    document.getElementById('searchInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') search();
+    });
+  </script>
+</body>
+</html>
