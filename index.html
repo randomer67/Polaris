@@ -5,157 +5,459 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Polaris - SZTU全球顶级论文平台</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e3a5f',900:'#0f172a' }
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    .loading-spinner {
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #3b82f6;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      animation: spin 1s linear infinite;
-      display: inline-block;
-      vertical-align: middle;
-      margin-right: 8px;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes pulse-slow { 0%,100% { opacity:1; } 50% { opacity:.6; } }
+    .spinner { width:28px;height:28px;border:3px solid #e5e7eb;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite; }
+    .fade-up { animation: fadeUp .4s ease-out both; }
+    .card-hover { transition: all .2s ease; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,.1); }
+    .dark .card-hover:hover { box-shadow: 0 8px 25px rgba(0,0,0,.4); }
+    .tag { display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:9999px;font-size:12px;font-weight:500; }
+    .scroll-top { position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .3s;z-index:50; }
+    .scroll-top.show { opacity:1; }
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-thumb { background:#94a3b8;border-radius:3px; }
+    .dark ::-webkit-scrollbar-thumb { background:#475569; }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+
   <!-- 顶部导航 -->
-  <nav class="bg-blue-900 text-white p-4 shadow-lg">
-    <div class="max-w-6xl mx-auto flex justify-between items-center">
-      <h1 class="text-xl font-bold">⭐ Polaris</h1>
-      <span class="text-sm opacity-80">SZTU · Where students meet the world's best research</span>
+  <nav class="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">P</div>
+        <div>
+          <h1 class="text-lg font-bold leading-tight">Polaris</h1>
+          <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-tight">SZTU Academic Navigator</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="toggleFavorites()" class="relative px-3 py-1.5 text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition" title="我的收藏">
+          <span>⭐</span> <span class="hidden sm:inline">收藏</span>
+          <span id="favCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+        </button>
+        <button onclick="toggleDark()" class="w-9 h-9 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center transition" title="切换主题">
+          <span id="themeIcon">🌙</span>
+        </button>
+      </div>
     </div>
   </nav>
 
-  <main class="max-w-6xl mx-auto p-6">
-    <!-- 学科入口 -->
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">选择你的学科方向</h2>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="disciplines"></div>
+  <!-- 主内容 -->
+  <main class="max-w-7xl mx-auto px-4 py-8">
 
-    <!-- 搜索框 -->
-    <div class="mt-10">
-      <div class="flex gap-2">
-        <input id="searchInput" type="text" placeholder="搜索论文标题、关键词、作者..."
-          class="flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-        <button onclick="search()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-          检索
-        </button>
+    <!-- Hero区域 -->
+    <div id="heroSection" class="text-center mb-10">
+      <h2 class="text-3xl md:text-4xl font-extrabold mb-3 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+        探索全球顶级学术成果
+      </h2>
+      <p class="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+        面向深圳技术大学优势工科学科，聚合全球开放获取学术资源，一站式检索顶级期刊与会议论文
+      </p>
+      <!-- 统计卡片 -->
+      <div class="grid grid-cols-3 gap-4 max-w-lg mx-auto mt-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
+          <div class="text-2xl font-bold text-blue-600">2.6亿+</div>
+          <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">学术文献</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
+          <div class="text-2xl font-bold text-indigo-600">8</div>
+          <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">优势学科</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
+          <div class="text-2xl font-bold text-purple-600">2</div>
+          <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">数据源</div>
+        </div>
       </div>
-      <p class="text-sm text-gray-500 mt-2">数据来源：OpenAlex（2.6亿+文献）、Semantic Scholar（2亿+文献），均为免费开放获取资源</p>
     </div>
 
-    <!-- 搜索结果 -->
-    <div id="results" class="mt-6 space-y-4"></div>
+    <!-- 搜索区域 -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
+      <!-- 学科标签 -->
+      <div class="flex flex-wrap gap-2 mb-4" id="disciplineTags"></div>
+      <!-- 搜索框 -->
+      <div class="flex gap-2">
+        <input id="searchInput" type="text" placeholder="输入论文标题、关键词或作者名..."
+          class="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm">
+        <button onclick="doSearch(1)" id="searchBtn" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:opacity-90 transition font-medium text-sm whitespace-nowrap">
+          🔍 检索
+        </button>
+      </div>
+      <!-- 高级选项 -->
+      <div class="flex flex-wrap items-center gap-4 mt-4 text-sm">
+        <div class="flex items-center gap-2">
+          <label class="text-gray-500 dark:text-gray-400">排序：</label>
+          <select id="sortSelect" class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm outline-none">
+            <option value="cited">引用量最高</option>
+            <option value="date">最新发布</option>
+            <option value="relevance">相关度</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-gray-500 dark:text-gray-400">筛选：</label>
+          <label class="flex items-center gap-1 cursor-pointer">
+            <input type="checkbox" id="oaOnly" class="rounded">
+            <span>仅开放获取</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 搜索结果区 -->
+    <div id="resultsArea" class="hidden">
+      <div class="flex justify-between items-center mb-4">
+        <p id="resultSummary" class="text-sm text-gray-500 dark:text-gray-400"></p>
+        <button onclick="clearSearch()" class="text-sm text-blue-600 hover:underline">清除搜索</button>
+      </div>
+      <div id="results" class="space-y-4"></div>
+      <!-- 分页 -->
+      <div id="pagination" class="flex justify-center gap-2 mt-8"></div>
+    </div>
+
+    <!-- 收藏面板（默认隐藏） -->
+    <div id="favoritesPanel" class="hidden">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold">⭐ 我的收藏</h3>
+        <button onclick="toggleFavorites()" class="text-sm text-blue-600 hover:underline">返回搜索</button>
+      </div>
+      <div id="favList" class="space-y-4"></div>
+      <p id="favEmpty" class="text-center text-gray-400 py-12 hidden">还没有收藏任何论文，搜索后点击 ⭐ 即可收藏</p>
+    </div>
+
   </main>
 
+  <!-- 回到顶部 -->
+  <div id="scrollTopBtn" class="scroll-top bg-blue-600 text-white shadow-lg" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
+
   <!-- 底部 -->
-  <footer class="mt-12 py-6 text-center text-sm text-gray-500 border-t">
-    <p>Polaris — 深圳技术大学学术导航平台</p>
-    <p class="mt-1">本平台仅聚合公开学术元数据，全文内容均跳转至原始出版方，不涉及任何版权内容存储</p>
+  <footer class="mt-16 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 py-10">
+      <div class="grid md:grid-cols-3 gap-8">
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-7 h-7 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">P</div>
+            <span class="font-bold">Polaris</span>
+          </div>
+          <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+            深圳技术大学学术导航平台，面向优势工科学科，整合全球开放获取学术资源，为师生提供一站式论文检索服务。
+          </p>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-3 text-sm">数据来源</h4>
+          <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1.5">
+            <li>OpenAlex — 2.6亿+ 学术文献元数据（CC0协议）</li>
+            <li>Semantic Scholar — 2亿+ AI驱动学术搜索</li>
+            <li>所有全文链接均跳转至原始出版方</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-3 text-sm">合规声明</h4>
+          <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1.5">
+            <li>✅ 仅聚合公开学术元数据（标题/摘要/作者）</li>
+            <li>✅ 不存储任何论文PDF全文</li>
+            <li>✅ 不使用爬虫抓取付费数据库</li>
+            <li>✅ 不收集用户个人信息</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 text-center text-xs text-gray-400">
+        © 2026 Polaris · Shenzhen Technology University · Built with ❤️ and open data
+      </div>
+    </div>
   </footer>
 
-  <script>
-    const disciplines = [
-      { name: '集成电路', icon: '🔬', query: 'integrated circuit' },
-      { name: '光电工程', icon: '💡', query: 'optical engineering' },
-      { name: '计算机科学', icon: '💻', query: 'computer science' },
-      { name: '自动化', icon: '🤖', query: 'automation control' },
-      { name: '新能源', icon: '⚡', query: 'renewable energy' },
-      { name: '材料科学', icon: '🧪', query: 'materials science' },
-      { name: '生物医学工程', icon: '🏥', query: 'biomedical engineering' },
-      { name: '智能制造', icon: '🏭', query: 'intelligent manufacturing' },
-    ];
+<script>
+// ========== 配置 ==========
+const DISCIPLINES = [
+  { name:'集成电路', icon:'🔬', query:'integrated circuit' },
+  { name:'光电工程', icon:'💡', query:'optical engineering' },
+  { name:'计算机科学', icon:'💻', query:'computer science' },
+  { name:'自动化', icon:'🤖', query:'automation control' },
+  { name:'新能源', icon:'⚡', query:'renewable energy' },
+  { name:'材料科学', icon:'🧪', query:'materials science' },
+  { name:'生物医学工程', icon:'🏥', query:'biomedical engineering' },
+  { name:'智能制造', icon:'🏭', query:'intelligent manufacturing' },
+];
+const PER_PAGE = 15;
+let currentPage = 1;
+let currentQuery = '';
+let currentDiscipline = '';
+let allResults = [];
 
-    const container = document.getElementById('disciplines');
-    disciplines.forEach(d => {
-      const card = document.createElement('div');
-      card.className = 'bg-white p-6 rounded-xl shadow hover:shadow-lg cursor-pointer transition text-center';
-      card.innerHTML = `<div class="text-4xl mb-2">${d.icon}</div><div class="font-semibold">${d.name}</div>`;
-      card.onclick = () => {
-        document.getElementById('searchInput').value = d.query;
-        search();
-      };
-      container.appendChild(card);
+// ========== 初始化 ==========
+function init() {
+  // 渲染学科标签
+  const tagContainer = document.getElementById('disciplineTags');
+  const allTag = document.createElement('button');
+  allTag.className = 'disc-tag px-4 py-1.5 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 transition';
+  allTag.textContent = '全部学科';
+  allTag.onclick = () => selectDiscipline('', allTag);
+  tagContainer.appendChild(allTag);
+
+  DISCIPLINES.forEach(d => {
+    const tag = document.createElement('button');
+    tag.className = 'disc-tag px-4 py-1.5 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-600 transition';
+    tag.textContent = `${d.icon} ${d.name}`;
+    tag.onclick = () => selectDiscipline(d.query, tag);
+    tagContainer.appendChild(tag);
+  });
+
+  // 深色模式
+  if (localStorage.getItem('polaris-dark') === 'true') {
+    document.documentElement.classList.add('dark');
+    document.getElementById('themeIcon').textContent = '☀️';
+  }
+
+  // 收藏数
+  updateFavCount();
+
+  // 回到顶部按钮
+  window.addEventListener('scroll', () => {
+    document.getElementById('scrollTopBtn').classList.toggle('show', window.scrollY > 400);
+  });
+}
+
+// ========== 学科选择 ==========
+function selectDiscipline(query, el) {
+  currentDiscipline = query;
+  document.querySelectorAll('.disc-tag').forEach(t => {
+    t.className = 'disc-tag px-4 py-1.5 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-600 transition';
+  });
+  el.className = 'disc-tag px-4 py-1.5 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 transition';
+  if (query) document.getElementById('searchInput').value = query;
+}
+
+// ========== 搜索 ==========
+async function doSearch(page = 1) {
+  const query = document.getElementById('searchInput').value.trim();
+  if (!query) return;
+  currentQuery = query;
+  currentPage = page;
+
+  const sort = document.getElementById('sortSelect').value;
+  const oaOnly = document.getElementById('oaOnly').checked;
+
+  // 显示结果区，隐藏收藏和Hero
+  document.getElementById('resultsArea').classList.remove('hidden');
+  document.getElementById('favoritesPanel').classList.add('hidden');
+  document.getElementById('heroSection').classList.add('hidden');
+
+  const resultsDiv = document.getElementById('results');
+  resultsDiv.innerHTML = '<div class="text-center py-12"><div class="spinner mx-auto mb-3"></div><p class="text-sm text-gray-400">正在检索全球学术文献...</p></div>';
+  document.getElementById('pagination').innerHTML = '';
+
+  try {
+    const sortParam = sort === 'cited' ? 'cited_by_count:desc' : sort === 'date' ? 'publication_date:desc' : 'relevance_score:desc';
+    const oaFilter = oaOnly ? '&filter=open_access.is_oa:true' : '';
+    const offset = (page - 1) * PER_PAGE;
+
+    const [oaRes, ssRes] = await Promise.all([
+      fetch(`https://api.openalex.org/works?search=${encodeURIComponent(query)}&sort=${sortParam}&per_page=${PER_PAGE}&offset=${offset}${oaFilter}&mailto=user@example.com`).then(r => r.json()),
+      page === 1 ? fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&limit=10&fields=title,authors,year,citationCount,tldr,openAccessPdf,url,venue`).then(r => r.json()) : Promise.resolve({data:[]})
+    ]);
+
+    allResults = [];
+    const seen = new Set();
+
+    // OpenAlex
+    (oaRes.results || []).forEach(w => {
+      const t = w.title?.toLowerCase();
+      if (!t || seen.has(t)) return;
+      seen.add(t);
+      allResults.push({
+        title: w.title,
+        authors: w.authorships?.map(a => a.author.display_name) || [],
+        year: w.publication_year,
+        citedBy: w.cited_by_count || 0,
+        url: w.doi || w.primary_location?.landing_page_url || '#',
+        isOA: w.open_access?.is_oa,
+        oaUrl: w.open_access?.oa_url,
+        venue: w.primary_location?.source?.display_name || '',
+        type: w.type || '',
+        abstract: '',
+        tldr: '',
+        source: 'OpenAlex'
+      });
     });
 
-    async function search() {
-      const query = document.getElementById('searchInput').value.trim();
-      if (!query) return alert('请输入搜索关键词');
-
-      const resultsDiv = document.getElementById('results');
-      resultsDiv.innerHTML = '<div class="text-center py-8"><span class="loading-spinner"></span>检索中，请稍候...</div>';
-
-      try {
-        const [openAlexData, semanticData] = await Promise.all([
-          fetch(`https://api.openalex.org/works?search=${encodeURIComponent(query)}&sort=cited_by_count:desc&per_page=15&mailto=test@example.com`).then(r => r.json()),
-          fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&limit=10&fields=title,authors,year,citationCount,tldr,openAccessPdf,url`).then(r => r.json())
-        ]);
-
-        let allPapers = [];
-        const seenTitles = new Set();
-
-        (openAlexData.results || []).forEach(work => {
-          const title = work.title?.toLowerCase();
-          if (!title || seenTitles.has(title)) return;
-          seenTitles.add(title);
-          allPapers.push({
-            title: work.title,
-            authors: work.authorships?.slice(0, 3).map(a => a.author.display_name).join(', ') + (work.authorships?.length > 3 ? ' et al.' : ''),
-            year: work.publication_year,
-            citedBy: work.cited_by_count || 0,
-            url: work.doi ? `https://doi.org/${work.doi.replace('https://doi.org/', '')}` : work.primary_location?.landing_page_url,
-            isOA: work.open_access?.is_oa,
-            tldr: work.abstract_inverted_index ? '点击查看摘要' : ''
-          });
-        });
-
-        (semanticData.data || []).forEach(paper => {
-          const title = paper.title?.toLowerCase();
-          if (!title || seenTitles.has(title)) return;
-          seenTitles.add(title);
-          allPapers.push({
-            title: paper.title,
-            authors: paper.authors?.slice(0, 3).map(a => a.name).join(', ') + (paper.authors?.length > 3 ? ' et al.' : ''),
-            year: paper.year,
-            citedBy: paper.citationCount || 0,
-            url: paper.openAccessPdf?.url || paper.url,
-            isOA: !!paper.openAccessPdf,
-            tldr: paper.tldr?.text || ''
-          });
-        });
-
-        allPapers.sort((a, b) => b.citedBy - a.citedBy);
-
-        if (allPapers.length === 0) {
-          resultsDiv.innerHTML = '<p class="text-center text-gray-500 py-8">未找到相关论文，请尝试其他关键词</p>';
-          return;
-        }
-
-        resultsDiv.innerHTML = allPapers.map(paper => `
-          <div class="bg-white p-5 rounded-lg shadow hover:shadow-md transition">
-            <h3 class="font-bold text-lg text-blue-800">
-              <a href="${paper.url || '#'}" target="_blank" class="hover:underline">${paper.title}</a>
-            </h3>
-            <p class="text-sm text-gray-500 mt-1">${paper.authors} · ${paper.year || '未知年份'} · 引用 ${paper.citedBy} 次</p>
-            ${paper.tldr ? `<p class="text-sm text-gray-600 mt-2">${paper.tldr}</p>` : ''}
-            <div class="flex gap-2 mt-2">
-              ${paper.isOA ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">开放获取</span>' : ''}
-            </div>
-          </div>
-        `).join('');
-      } catch (err) {
-        resultsDiv.innerHTML = `<p class="text-red-500 text-center py-8">检索出错：${err.message}，请稍后重试</p>`;
-      }
-    }
-
-    document.getElementById('searchInput').addEventListener('keydown', e => {
-      if (e.key === 'Enter') search();
+    // Semantic Scholar
+    (ssRes.data || []).forEach(p => {
+      const t = p.title?.toLowerCase();
+      if (!t || seen.has(t)) return;
+      seen.add(t);
+      allResults.push({
+        title: p.title,
+        authors: p.authors?.map(a => a.name) || [],
+        year: p.year,
+        citedBy: p.citationCount || 0,
+        url: p.openAccessPdf?.url || p.url || '#',
+        isOA: !!p.openAccessPdf,
+        oaUrl: p.openAccessPdf?.url,
+        venue: p.venue || '',
+        type: '',
+        abstract: '',
+        tldr: p.tldr?.text || '',
+        source: 'Semantic Scholar'
+      });
     });
-  </script>
+
+    if (sort === 'cited') allResults.sort((a,b) => b.citedBy - a.citedBy);
+
+    const total = oaRes.meta?.count || allResults.length;
+    document.getElementById('resultSummary').textContent = `找到约 ${total.toLocaleString()} 条结果 · 当前第 ${page} 页`;
+
+    renderResults(allResults);
+    renderPagination(total, page);
+  } catch (err) {
+    resultsDiv.innerHTML = `<div class="text-center py-12"><p class="text-red-500">检索出错：${err.message}</p><p class="text-sm text-gray-400 mt-2">请检查网络连接后重试</p></div>`;
+  }
+}
+
+// ========== 渲染结果 ==========
+function renderResults(papers) {
+  const div = document.getElementById('results');
+  if (!papers.length) {
+    div.innerHTML = '<div class="text-center py-12 text-gray-400">未找到相关论文，请尝试其他关键词</div>';
+    return;
+  }
+  div.innerHTML = papers.map((p, i) => {
+    const isFav = isFavorited(p.title);
+    return `
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 card-hover fade-up" style="animation-delay:${i*50}ms">
+      <div class="flex justify-between items-start gap-3">
+        <h3 class="font-semibold text-base leading-snug flex-1">
+          <a href="${p.url}" target="_blank" rel="noopener" class="text-blue-700 dark:text-blue-400 hover:underline">${p.title}</a>
+        </h3>
+        <button onclick="toggleFav('${escapeStr(p.title)}', this)" class="flex-shrink-0 text-xl transition hover:scale-110" title="${isFav?'取消收藏':'收藏'}">${isFav?'⭐':'☆'}</button>
+      </div>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+        ${p.authors.slice(0,4).join(', ')}${p.authors.length>4?' et al.':''}
+      </p>
+      <div class="flex flex-wrap items-center gap-2 mt-3">
+        ${p.year ? `<span class="tag bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">📅 ${p.year}</span>` : ''}
+        <span class="tag bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">📊 引用 ${p.citedBy}</span>
+        ${p.venue ? `<span class="tag bg-purple-50 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300">📖 ${p.venue}</span>` : ''}
+        ${p.isOA ? `<a href="${p.oaUrl||p.url}" target="_blank" class="tag bg-green-50 dark:bg-green-900/50 text-green-700 dark:text-green-300 hover:opacity-80">🔓 开放获取</a>` : ''}
+        ${p.type ? `<span class="tag bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">${p.type}</span>` : ''}
+      </div>
+      ${p.tldr ? `<p class="text-sm text-gray-600 dark:text-gray-300 mt-3 leading-relaxed bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">💡 ${p.tldr}</p>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ========== 分页 ==========
+function renderPagination(total, current) {
+  const totalPages = Math.min(Math.ceil(total / PER_PAGE), 20);
+  if (totalPages <= 1) return;
+  const div = document.getElementById('pagination');
+  let html = '';
+  if (current > 1) html += `<button onclick="doSearch(${current-1})" class="px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition">上一页</button>`;
+  for (let i = Math.max(1,current-2); i <= Math.min(totalPages,current+2); i++) {
+    html += `<button onclick="doSearch(${i})" class="px-4 py-2 rounded-lg text-sm transition ${i===current?'bg-blue-600 text-white':'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}">${i}</button>`;
+  }
+  if (current < totalPages) html += `<button onclick="doSearch(${current+1})" class="px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition">下一页</button>`;
+  div.innerHTML = html;
+}
+
+// ========== 收藏功能 ==========
+function getFavs() { return JSON.parse(localStorage.getItem('polaris-favs') || '[]'); }
+function saveFavs(favs) { localStorage.setItem('polaris-favs', JSON.stringify(favs)); updateFavCount(); }
+function isFavorited(title) { return getFavs().some(f => f.title === title); }
+function escapeStr(s) { return s.replace(/'/g, "\\'").replace(/"/g, '\\"'); }
+
+function toggleFav(title, btn) {
+  let favs = getFavs();
+  const idx = favs.findIndex(f => f.title === title);
+  if (idx >= 0) {
+    favs.splice(idx, 1);
+    btn.textContent = '☆';
+    btn.title = '收藏';
+  } else {
+    const paper = allResults.find(p => p.title === title);
+    if (paper) favs.push(paper);
+    btn.textContent = '⭐';
+    btn.title = '取消收藏';
+  }
+  saveFavs(favs);
+}
+
+function toggleFavorites() {
+  const panel = document.getElementById('favoritesPanel');
+  const results = document.getElementById('resultsArea');
+  const hero = document.getElementById('heroSection');
+  const searchBox = document.querySelector('.bg-white.dark\\:bg-gray-800.rounded-2xl');
+
+  if (panel.classList.contains('hidden')) {
+    panel.classList.remove('hidden');
+    results.classList.add('hidden');
+    hero.classList.add('hidden');
+    if(searchBox) searchBox.classList.add('hidden');
+    renderFavList();
+  } else {
+    panel.classList.add('hidden');
+    results.classList.add('hidden');
+    hero.classList.remove('hidden');
+    if(searchBox) searchBox.classList.remove('hidden');
+  }
+}
+
+function renderFavList() {
+  const favs = getFavs();
+  const list = document.getElementById('favList');
+  const empty = document.getElementById('favEmpty');
+  if (!favs.length) { list.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  allResults = favs;
+  renderResults(favs);
+  list.innerHTML = '';
+  document.getElementById('favList').appendChild(document.getElementById('results').cloneNode(true));
+}
+
+function updateFavCount() {
+  const count = getFavs().length;
+  const badge = document.getElementById('favCount');
+  if (count > 0) { badge.textContent = count; badge.classList.remove('hidden'); }
+  else { badge.classList.add('hidden'); }
+}
+
+// ========== 深色模式 ==========
+function toggleDark() {
+  document.documentElement.classList.toggle('dark');
+  const isDark = document.documentElement.classList.contains('dark');
+  localStorage.setItem('polaris-dark', isDark);
+  document.getElementById('themeIcon').textContent = isDark ? '☀️' : '🌙';
+}
+
+// ========== 清除搜索 ==========
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('resultsArea').classList.add('hidden');
+  document.getElementById('favoritesPanel').classList.add('hidden');
+  document.getElementById('heroSection').classList.remove('hidden');
+  const searchBox = document.querySelector('.bg-white.dark\\:bg-gray-800.rounded-2xl');
+  if(searchBox) searchBox.classList.remove('hidden');
+}
+
+// ========== 事件绑定 ==========
+document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(1); });
+
+// 启动
+init();
+</script>
 </body>
 </html>
